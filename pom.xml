@@ -20,7 +20,7 @@
       </developer>
     </developers>
     <description>SimpleApps (by AppsoFluna): A web-based tool to create simple applications.</description>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
