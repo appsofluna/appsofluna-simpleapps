@@ -12,6 +12,7 @@
  */
 package com.appsofluna.simpleapps.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -29,6 +30,7 @@ public abstract class AbstractEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
+    @JsonProperty
     private Long id;
 
     public Long getId() {

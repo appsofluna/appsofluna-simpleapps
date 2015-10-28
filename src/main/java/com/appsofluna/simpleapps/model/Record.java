@@ -13,9 +13,12 @@
 package com.appsofluna.simpleapps.model;
 
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -30,6 +33,12 @@ public class Record extends AbstractEntity implements Serializable {
     @ManyToOne
     @JoinColumn(name="item_id")
     private Item item;
+    
+    @OneToMany(mappedBy = "record")
+    private List<Value> values;
+    
+    @Column(name="status_no")
+    private Integer statusNo;
 
     public Item getItem() {
         return item;
@@ -37,5 +46,21 @@ public class Record extends AbstractEntity implements Serializable {
 
     public void setItem(Item item) {
         this.item = item;
+    }
+
+    public Integer getStatusNo() {
+        return statusNo;
+    }
+
+    public void setStatusNo(Integer statusNo) {
+        this.statusNo = statusNo;
+    }
+
+    public List<Value> getValues() {
+        return values;
+    }
+
+    public void setValues(List<Value> values) {
+        this.values = values;
     }
 }

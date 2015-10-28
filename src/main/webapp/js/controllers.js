@@ -13,7 +13,7 @@
 
 angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.services'])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout,SAApps,SAUsers) {
+.controller('AppCtrl', function($scope, $ionicModal,$ionicPopup,$timeout,SAApps,SAUsers) {
   // Form data for the login modal
   $scope.loginData = {};
 
@@ -46,16 +46,84 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
   };
 
   //loading the apps
-  $scope.sa_apps = SAApps.query();
+  SAApps.query(function(recs) {
+      $scope.sa_apps = recs;
+  });
 
   //loading the users
-  $scope.sa_users = SAUsers.query();
+  SAUsers.query(function(recs) {
+      $scope.sa_users = recs;
+  });
+  
+  // Form data for the app modal
+    $scope.appData = {};
+
+    // Create the app modal that we will use later
+    $ionicModal.fromTemplateUrl('templates/save_app.html', {
+      scope: $scope
+    }).then(function(modal) {
+      $scope.appModal = modal;
+    });
+
+    // Triggered in the app modal to close it
+    $scope.closeSaveApp = function() {
+      $scope.appModal.hide();
+    };
+
+    // Open the add app dialog
+    $scope.showAddApp = function() {
+      console.log('Clicked!');
+      $scope.appData = {};
+      $scope.appModal.show();
+    };
+
+    // Open the edit app dialog
+    $scope.showEditApp = function(field) {
+      $scope.appData = field;
+      $scope.appModal.show();
+    };
+
+    // Open the confirm delete app dialog
+    $scope.showConfirmDeleteApp = function(app) {
+      $scope.appData = app;
+      var confirmDeleteAppPopup = $ionicPopup.confirm({
+        title: 'Delete App',
+        template: 'Are you sure you want to delete the record: '+app.id+'?'
+      });
+      confirmDeleteAppPopup.then(function(res) {
+        if(res) {
+          console.log('You are sure');
+          SAApps.delete($scope.appData,function() {
+            SAApps.query(function(recs) {
+              $scope.sa_apps = recs;
+            });
+          });
+        } else {
+          console.log('You are not sure');
+        }
+      });
+    };
+
+    // Perform the save action when the user submits the app form
+    $scope.saveApp = function() {
+      $scope.closeSaveApp();
+      var app = $scope.appData;
+      console.log('Saving app',app);
+      SAApps.save(app, function (data) {
+          console.log('res-start');
+          console.log(data);
+          SAApps.query(function(recs) {
+            $scope.sa_apps = recs;
+          });
+          console.log('res-end');
+      });
+    };
 })
-
-
 .controller('SAUsersCtrl', function($scope, SAUsers) {
   console.log('getting users');
-  $scope.sa_users = SAUsers.query();
+  SAUsers.query(function(recs) {
+    $scope.sa_users = recs;
+  });
 })
 .controller('SAUsersCtrl', function($scope, $stateParams, SAUsers) {
   if(typeof $stateParams.userId === 'undefined'){
@@ -66,18 +134,35 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
     $scope.sa_user = SAUsers.get({userId: $stateParams.userId});
   }
 })
-.controller('SAItemsCtrl', function($scope, $ionicModal, $ionicPopup, $timeout, $stateParams, SAItems, SAFields, SARecords) {
+.controller('SAItemsCtrl', function($scope, $ionicModal, $ionicPopup, $timeout, $stateParams, SAItems, SAFields, SARecords, SAValues) {
+  SAItems.query(function (recs) {
+    $scope.sa_items = recs;
+  });
   if(typeof $stateParams.itemId === 'undefined'){
     console.log('getting no id ');
-    $scope.sa_items = SAItems.query();
   } else {
     console.log('getting item');
-    $scope.sa_item = SAItems.get({itemId: $stateParams.itemId});
-    $scope.sa_item_fields = SAFields.findByItem({itemId: $stateParams.itemId});
-    $scope.sa_item_records = SARecords.findByItem({itemId: $stateParams.itemId});
+    SAItems.get($stateParams.itemId,function (rec) {
+        $scope.sa_item = rec;
+    });
+    SAFields.findByItem($stateParams.itemId,function(recs) {
+        $scope.sa_item_fields = recs;
+    });
+    SARecords.findByItem($stateParams.itemId,function(recs) {
+        $scope.sa_item_records = recs;
+    });
 
     // Form data for the field modal
     $scope.fieldData = {};
+    $scope.fieldTypePage = "";
+    $scope.fieldTypeCheck = function() {
+        if ($scope.fieldData.type==='item') {
+            $scope.fieldTypePage = 'templates/field_types/item.html';
+        } else {
+            $scope.fieldTypePage = '';
+        }
+    };
+    $scope.fieldTypeCheck();
 
     // Create the field modal that we will use later
     $ionicModal.fromTemplateUrl('templates/save_field.html', {
@@ -100,6 +185,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
     // Open the edit field dialog
     $scope.showEditFiled = function(field) {
       $scope.fieldData = field;
+      $scope.fieldTypeCheck();
       $scope.fieldModal.show();
     };
 
@@ -113,8 +199,11 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
       confirmDeleteFieldPopup.then(function(res) {
         if(res) {
           console.log('You are sure');
-          SAFields.deleteField($scope.fieldData);
-          $scope.sa_item_fields = SAFields.findByItem({itemId: $stateParams.itemId});
+          SAFields.delete($scope.fieldData,function() {
+              SAFields.findByItem($stateParams.itemId, function(recs) {
+                  $scope.sa_item_fields = recs;
+              });
+          });
         } else {
           console.log('You are not sure');
         }
@@ -125,10 +214,13 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
     $scope.saveField = function() {
       $scope.closeSaveField();
       var field = $scope.fieldData;
-      field.item_id = $scope.sa_item.id;
-      SAFields.saveField(field);
+      field.item = $scope.sa_item._links.self.href;
+      SAFields.save(field,function() {
+          SAFields.findByItem($stateParams.itemId, function(recs) {
+              $scope.sa_item_fields = recs;
+          });
+      });
 
-      $scope.sa_item_fields = SAFields.findByItem({itemId: $stateParams.itemId});
       console.log('Added field',field);
     };
 
@@ -171,8 +263,11 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
       confirmDeleteRecordPopup.then(function(res) {
         if(res) {
           console.log('You are sure');
-          SARecords.deleteRecord($scope.recordData);
-          $scope.sa_item_records = SARecords.findByItem({itemId: $stateParams.itemId});
+          SARecords.delete($scope.recordData,function() {
+            SARecords.findByItem($stateParams.itemId, function(recs) {
+                $scope.sa_item_records = recs;
+            });
+          });
         } else {
           console.log('You are not sure');
         }
@@ -184,27 +279,54 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
       $scope.closeSaveRecord();
       var record = $scope.recordData;
       console.log('Saving record',record);
-      record.item_id = $scope.sa_item.id;
-      SARecords.saveRecord(record);
-
-      $scope.sa_item_records = SARecords.findByItem({itemId: $stateParams.itemId});
+      record.item = $scope.sa_item._links.self.href;
+      record.status_no = -1;
+      SARecords.save(record,function(saved) {  
+        var record_href = saved.headers('Location');
+        var lastCallback = function() {
+            
+        };
+        for (sa_field_sec in $scope.sa_item_fields) {
+            var sa_field_rec = $scope.sa_item_fields[sa_field_sec];
+            var sa_record_val = {};
+            sa_record_val.field = sa_field_rec._links.self.href;
+            sa_record_val.content = record.fieldValues[sa_field_rec.id];
+            sa_record_val.record = record_href;
+            lastCallback = function() {
+                SAValues.save(sa_record_val,lastCallback);
+            };
+        }
+        lastCallback();
+        
+        SARecords.findByItem($stateParams.itemId, function(recs) {
+            $scope.sa_item_records = recs;
+        });
+      });
       console.log('Saved record',record);
     };
   }
 })
 
-.controller('SAAppsCtrl', function($scope, SAApps) {
+.controller('SAAppsCtrl', function($scope, $ionicModal, SAApps) {
     console.log('getting apps');
-    $scope.sa_apps = SAApps.query();
+    SAApps.query(function(recs) {
+      $scope.sa_apps = recs;
+    });
 })
-.controller('SAAppsCtrl', function($scope, $ionicModal, $stateParams, SAApps,SAItems) {
+.controller('SAAppsCtrl', function($scope, $ionicModal, $ionicPopup,$stateParams, SAApps,SAItems) {
   if(typeof $stateParams.appId === 'undefined'){
     console.log('getting app no id ');
-    $scope.sa_apps = SAApps.query();
+    SAApps.query(function(recs) {
+      $scope.sa_apps = recs;
+    });
   } else {
     console.log('getting app');
-    $scope.sa_app = SAApps.get({appId: $stateParams.appId});
-    $scope.sa_app_items = SAItems.findByApp({appId: $stateParams.appId});
+    SAApps.get($stateParams.appId, function (data){
+        $scope.sa_app = data;
+    });
+    SAItems.findByApp($stateParams.appId,function (recs){
+        $scope.sa_app_items = recs;
+    });
 
     // Form data for the item modal
     $scope.itemData = {};
@@ -240,11 +362,14 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
         title: 'Delete Item',
         template: 'Are you sure you want to item the record: '+item.id+'?'
       });
-      confirmDeleteRecordPopup.then(function(res) {
+      confirmDeleteItemPopup.then(function(res) {
         if(res) {
           console.log('You are sure');
-          SAItems.deleteItem($scope.itemData);
-          $scope.sa_app_items = SAItems.findByApp({appId: $stateParams.appId});
+          SAItems.delete($scope.itemData,function(data) {
+              SAItems.findByApp($stateParams.appId,function (recs){
+                  $scope.sa_app_items = recs;
+              });
+          });
         } else {
           console.log('You are not sure');
         }
@@ -256,10 +381,12 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
       $scope.closeSaveItem();
       var item = $scope.itemData;
       console.log('Saving item',item);
-      item.app_id = $scope.sa_app.id;
-      SAItems.saveItem(item);
-
-      $scope.sa_app_items = SAItems.findByApp({appId: $stateParams.appId});
+      item.app = $scope.sa_app._links.self.href;
+      SAItems.save(item,function(data) {
+        SAItems.findByApp($stateParams.appId,function (recs){
+            $scope.sa_app_items = recs;
+        });
+      });
       console.log('Saved item',item);
     };
   }

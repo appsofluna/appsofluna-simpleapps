@@ -14,7 +14,6 @@
 // SimpleApps
 // 'appsoluna.simpleapps.controllers' is found in controllers.js
 angular.module('appsoluna.simpleapps', ['ionic', 'appsoluna.simpleapps.controllers'])
-
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard

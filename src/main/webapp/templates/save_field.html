@@ -26,9 +26,24 @@ THE SOFTWARE.
           <input type="text" ng-model="fieldData.name">
         </label>
         <label class="item item-input">
-          <span class="input-label">Type</span>
-          <input type="text" ng-model="fieldData.type">
+          <span class="input-label">Field Label</span>
+          <input type="text" ng-model="fieldData.label">
         </label>
+        <label class="item item-input">
+          <span class="input-label">Type</span>
+          <select ng-model="fieldData.type" ng-change="fieldTypeCheck()">
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="range">Range</option>
+            <option value="date">Date</option>
+            <option value="period">Period</option>
+            <option value="selection">Selection</option>
+            <option value="item">Item</option>
+          </select>
+        </label>
+          <div ng-include="fieldTypePage">
+              
+          </div>
         <label class="item">
           <button class="button button-block button-positive" type="submit">Save</button>
         </label>

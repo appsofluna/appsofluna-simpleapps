@@ -12,6 +12,8 @@
  */
 package com.appsofluna.simpleapps.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,17 +25,37 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="prototyper_app")
+@JsonAutoDetect(fieldVisibility=JsonAutoDetect.Visibility.NONE)
 public class App extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
     @Column(name = "name", unique = true)
     private String name;
+    
+    @Column(name = "description")
+    private String description;
 
+    @JsonProperty
+    @Override
+    public Long getId() {
+        return super.getId();
+    }
+    
+    @JsonProperty
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @JsonProperty
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

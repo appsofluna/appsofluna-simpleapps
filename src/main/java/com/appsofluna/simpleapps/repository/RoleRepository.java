@@ -12,8 +12,12 @@
  */
 package com.appsofluna.simpleapps.repository;
 
+import com.appsofluna.simpleapps.model.Item;
 import com.appsofluna.simpleapps.model.Role;
+import java.util.List;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
@@ -23,4 +27,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource(collectionResourceRel = "role", path = "role")
 public interface RoleRepository extends PagingAndSortingRepository<Role,Long> {
     //RoleRepository
+    
+    @Query("SELECT o FROM Item o WHERE o.app.id = :appId")
+    List<Item> findByApp(@Param("appId") long appId);
 }

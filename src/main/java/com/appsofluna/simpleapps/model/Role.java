@@ -14,6 +14,7 @@ package com.appsofluna.simpleapps.model;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -27,7 +28,14 @@ public class Role extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
     @ManyToOne
-    private App project;
-    
-    
+    @JoinColumn(name = "app_id")
+    private App app;
+
+    public App getApp() {
+        return app;
+    }
+
+    public void setApp(App app) {
+        this.app = app;
+    }
 }

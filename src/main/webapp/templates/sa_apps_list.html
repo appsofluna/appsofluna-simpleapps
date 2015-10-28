@@ -13,10 +13,13 @@ THE SOFTWARE.
 
 <ion-view view-title="Applications">
   <ion-content>
+    <i class="icon ion-plus-round" ng-click="showAddApp()"></i>
     <ion-list>
       <ion-item ng-repeat="sa_app in sa_apps"
                 href="#/app/sa_app/{{sa_app.id}}">
         {{sa_app.name}}
+        <i class="icon ion-close-round" ng-click="showConfirmDeleteApp(sa_app)"></i>
+        <i class="icon ion-edit" ng-click="showEditApp(sa_app)"></i>
       </ion-item>
     </ion-list>
   </ion-content>
