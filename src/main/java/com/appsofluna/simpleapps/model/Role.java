@@ -13,6 +13,7 @@
 package com.appsofluna.simpleapps.model;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -30,6 +31,12 @@ public class Role extends AbstractEntity implements Serializable {
     @ManyToOne
     @JoinColumn(name = "app_id")
     private App app;
+    
+    @Column(name = "name")
+    private String name;
+    
+    @Column(name = "is_all_allowed")
+    private boolean allAllowed;
 
     public App getApp() {
         return app;
@@ -38,4 +45,22 @@ public class Role extends AbstractEntity implements Serializable {
     public void setApp(App app) {
         this.app = app;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isAllAllowed() {
+        return allAllowed;
+    }
+
+    public void setAllAllowed(boolean allAllowed) {
+        this.allAllowed = allAllowed;
+    }
+    
+    
 }

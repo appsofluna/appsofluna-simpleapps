@@ -27,37 +27,14 @@ angular.module('appsoluna.simpleapps', ['ionic', 'appsoluna.simpleapps.controlle
     }
   });
 })
-
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
-
   .state('app', {
     url: "/app",
     abstract: true,
     templateUrl: "templates/menu.html",
     controller: 'AppCtrl'
   })
-
-  .state('app.sa_apps', {
-    url: "/sa_apps",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/sa_apps_list.html",
-        controller: 'SAAppsCtrl'
-      }
-    }
-  })
-
-  .state('app.live_app', {
-    url: "/live/:appId",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/live.html",
-        controller: 'SAAppsCtrl'
-      }
-    }
-  })
-
   .state('app.live_item', {
     url: "/live_item/:itemId",
     views: {
@@ -103,7 +80,6 @@ angular.module('appsoluna.simpleapps', ['ionic', 'appsoluna.simpleapps.controlle
         }
     }
   })
-
   .state('app.session', {
     url: "/session/:sessionId",
     views: {
@@ -122,24 +98,16 @@ angular.module('appsoluna.simpleapps', ['ionic', 'appsoluna.simpleapps.controlle
       }
     }
   })
-  .state('app.browse_app', {
-    url: "/browse_app",
+  .state('app.settings', {
+    url: "/settings",
     views: {
         'menuContent': {
-          templateUrl: "templates/browse_app.html",
-          controller: 'AppCtrl'
-      }
-    }
-  })
-  .state('app.browse_item', {
-    url: "/browse_item",
-    views: {
-        'menuContent': {
-          templateUrl: "templates/browse_item.html",
-          controller: 'AppCtrl'
+          templateUrl: "templates/settings.html",
+          controller: 'SettingsCtrl'
       }
     }
   });
+  
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/browse');
 });

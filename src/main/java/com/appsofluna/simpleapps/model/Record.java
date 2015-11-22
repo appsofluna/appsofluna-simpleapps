@@ -34,6 +34,10 @@ public class Record extends AbstractEntity implements Serializable {
     @JoinColumn(name="item_id")
     private Item item;
     
+    @ManyToOne
+    @JoinColumn(name="app_user_id")
+    private AppUser appUser;
+    
     @OneToMany(mappedBy = "record")
     private List<Value> values;
     
@@ -54,6 +58,14 @@ public class Record extends AbstractEntity implements Serializable {
 
     public void setStatusNo(Integer statusNo) {
         this.statusNo = statusNo;
+    }
+
+    public AppUser getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
     }
 
     public List<Value> getValues() {

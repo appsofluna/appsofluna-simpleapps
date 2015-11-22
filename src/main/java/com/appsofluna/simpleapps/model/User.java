@@ -31,6 +31,9 @@ public class User extends AbstractEntity implements Serializable {
     
     @Column(name = "password")
     private String password;
+    
+    @Column(name = "type")
+    private String type;
 
     public String getUsername() {
         return username;
@@ -46,5 +49,13 @@ public class User extends AbstractEntity implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
