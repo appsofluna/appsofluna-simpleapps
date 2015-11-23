@@ -22,7 +22,7 @@ import javax.persistence.Table;
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="prototyper_user")
+@Table(name="simpleapps_user")
 public class User extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     

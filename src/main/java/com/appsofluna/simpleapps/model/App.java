@@ -26,7 +26,7 @@ import javax.persistence.Table;
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="prototyper_app")
+@Table(name="simpleapps_app")
 @JsonAutoDetect(fieldVisibility=JsonAutoDetect.Visibility.NONE)
 public class App extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;

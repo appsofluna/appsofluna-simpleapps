@@ -21,10 +21,20 @@ THE SOFTWARE.
         <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
         </button>
       </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+          <a class="button button-icon button-clear" href="#/app/settings" ng-show="authenticated">
+          Logged in as {{username}}
+          </a>
+          <button class="button button-icon button-clear" ng-click="login()" ng-show="!authenticated">
+          Login
+          </button>
+        <button class="button button-icon button-clear" ng-click="logout()" ng-show="authenticated">
+          Logout
+        </button>
+      </ion-nav-buttons>  
     </ion-nav-bar>
-    <ion-nav-view name="menuContent"></ion-nav-view>
+    <ion-nav-view name="menuContent" ></ion-nav-view>
   </ion-side-menu-content>
-
   <ion-side-menu side="left">
     <ion-header-bar class="bar-stable">
       <h1 class="title">Menu</h1>
@@ -34,8 +44,11 @@ THE SOFTWARE.
         <ion-item menu-close href="#/app/browse">
           Browse
         </ion-item>
-        <ion-item menu-close ng-click="login()">
+        <ion-item menu-close ng-click="login()" ng-show="!authenticated">
           Login
+        </ion-item>
+        <ion-item menu-close ng-click="logout()" ng-show="authenticated">
+          Logout
         </ion-item>
         <ion-item menu-close href="#/app/settings">
           Settings

@@ -24,7 +24,7 @@ import javax.persistence.Table;
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="prototyper_field")
+@Table(name="simpleapps_field")
 public class Field extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     

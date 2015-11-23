@@ -12,7 +12,7 @@
  */
 
 angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.services'])
-        .controller('AppCtrl', function ($scope, $ionicModal, $ionicPopup, $timeout, SAApps, SAUsers) {
+        .controller('AppCtrl', function ($scope,$rootScope, $ionicModal, $ionicPopup, $timeout, SAApps, SAUsers,SALogin) {
             // Form data for the login modal
             $scope.loginData = {};
 
@@ -32,22 +32,41 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
             $scope.login = function () {
                 $scope.modal.show();
             };
+            
+            $scope.logout = function () {
+                SALogin.logout(function () {
+                    $rootScope.authenticated = SALogin.isLoggedIn();
+                });
+            };
+            
+            $rootScope.authenticated = SALogin.isLoggedIn();
+            $rootScope.username = SALogin.getUsername();
 
             // Perform the login action when the user submits the login form
             $scope.doLogin = function () {
                 console.log('Doing login', $scope.loginData);
                 
+                SALogin.login($scope.loginData.username,$scope.loginData.password,function(res_auth) {
+                    $rootScope.authenticated = res_auth;
+                    $rootScope.username =  $scope.loginData.username;
+                    $scope.closeLogin();
+                });
                 // Simulate a login delay. Remove this and replace with your login
                 // code if using a login system
+                
                 $timeout(function () {
                     $scope.closeLogin();
                 }, 1000);
             };
 
+            //$scope.authenticated = false;
+            
             //loading the apps
-            SAApps.query(function (recs) {
-                $scope.sa_apps = recs;
-            });
+            if ($rootScope.authenticated) {
+                SAApps.query(function (recs) {
+                    $scope.sa_apps = recs;
+                });
+            }
 
             // Form data for the app modal
             $scope.appData = {};

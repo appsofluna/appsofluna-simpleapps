@@ -1,6 +1,6 @@
 {
   "name": "appsofluna-simpleapps",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "SimpleApps by AppsoFluna",
   "main": "index.js",
   "scripts": {

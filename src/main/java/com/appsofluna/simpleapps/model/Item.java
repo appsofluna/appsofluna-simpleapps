@@ -24,7 +24,7 @@ import javax.persistence.Table;
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="prototyper_item")
+@Table(name="simpleapps_item")
 public class Item extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     

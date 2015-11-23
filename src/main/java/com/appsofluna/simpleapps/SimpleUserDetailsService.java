@@ -12,8 +12,10 @@
  */
 package com.appsofluna.simpleapps;
 
+import com.appsofluna.simpleapps.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,17 +30,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class SimpleUserDetailsService implements UserDetailsService {
 
+    @Autowired
+    private UserRepository userRepo;
+    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (!username.startsWith("usr")) {
+        com.appsofluna.simpleapps.model.User user = userRepo.findByUsername(username);
+        if (user==null) {
             throw new UsernameNotFoundException("Username " + username + " not found");
         }
-        return new User(username, "password", getGrantedAuthorities(username));
+        return new User(username,  user.getPassword(), getGrantedAuthorities(user));
     }
 
-    private Collection<? extends GrantedAuthority> getGrantedAuthorities(String username) {
+    private Collection<? extends GrantedAuthority> getGrantedAuthorities(com.appsofluna.simpleapps.model.User user) {
         Collection<? extends GrantedAuthority> authorities;
-        if (username.equals("usrAdmin")) {
+        if ("ADMIN".equals(user.getType())) {
             authorities = ga("ROLE_ADMIN","ROLE_BASIC");
         } else {
             authorities = ga("ROLE_BASIC");

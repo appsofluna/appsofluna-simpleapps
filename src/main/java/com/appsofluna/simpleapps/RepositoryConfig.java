@@ -25,6 +25,6 @@ public class RepositoryConfig extends RepositoryRestMvcConfiguration {
     @Override
     protected void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
         config.setBaseUri("/api");
-        config.exposeIdsFor(User.class,Role.class,App.class,Item.class,Field.class,Record.class,Value.class);
+        config.exposeIdsFor(User.class,Role.class,App.class,Item.class,Field.class,Record.class,Value.class,AppUser.class,Permission.class);
     }
 }
