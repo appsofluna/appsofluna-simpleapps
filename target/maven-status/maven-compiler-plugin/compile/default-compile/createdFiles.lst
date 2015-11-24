@@ -7,6 +7,7 @@ com/appsofluna/simpleapps/model/Item.class
 com/appsofluna/simpleapps/repository/AppUserRepository.class
 com/appsofluna/simpleapps/model/Value.class
 com/appsofluna/simpleapps/RepositoryConfig.class
+com/appsofluna/simpleapps/controller/RoleController.class
 com/appsofluna/simpleapps/model/Role.class
 com/appsofluna/simpleapps/model/User.class
 com/appsofluna/simpleapps/model/AppUser.class
@@ -23,3 +24,4 @@ com/appsofluna/simpleapps/repository/PermissionRepository.class
 com/appsofluna/simpleapps/repository/FieldRepository.class
 com/appsofluna/simpleapps/repository/UserRepository.class
 com/appsofluna/simpleapps/repository/AppRepository.class
+com/appsofluna/simpleapps/service/RoleService.class

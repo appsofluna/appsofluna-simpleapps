@@ -71,6 +71,15 @@ angular.module('appsoluna.simpleapps', ['ionic', 'appsoluna.simpleapps.controlle
       }
     }
   })
+  .state('app.sa_role', {
+    url: "/sa_role/:roleId",
+    views: {
+      'menuContent': {
+        templateUrl: "templates/sa_roles_single.html",
+        controller: 'SARolesCtrl'
+      }
+    }
+  })
   .state('app.sessions', {
     url: "/sessions",
     views: {

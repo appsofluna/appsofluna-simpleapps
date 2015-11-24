@@ -67,6 +67,25 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                         callback && callback(data._embedded && data._embedded[fac.facName]);
                     });
                 };
+                fac.getApp = function (role_id,callback) {
+                    $http.get(fac.facUrl + '/'+role_id+'/app').success(function (data) {
+                        callback && callback(data);
+                    });
+                };
+                fac.allowAllItems = function (role_id, enabled,callback) {
+                    $http.get(fac.facUrl + '/'+role_id+'/allowAllItems?enabled='+(enabled ? 'true' : 'false')).success(function (data) {
+                        callback && callback(data);
+                    });
+                };
+                return fac;
+            }])
+        .factory('SAPermissions', ['$http', function ($http) {
+                var fac = hateoasFac($http, 'permission');
+                fac.findByRole = function (role_id, callback) {
+                    $http.get(fac.facUrl + '/search/findByRole?roleId=' + role_id).success(function (data) {
+                        callback && callback(data._embedded && data._embedded[fac.facName]);
+                    });
+                };
                 return fac;
             }])
         .factory('SAFields', ['$http', function ($http) {

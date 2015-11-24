@@ -364,14 +364,68 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 };
             }
         })
-
+        .controller('SARolesCtrl', function ($scope, $ionicModal, $ionicPopup, $timeout, $stateParams, SAItems, SARoles, SAPermissions) {
+            if (typeof $stateParams.roleId === 'undefined') {
+                console.log('getting no role id ');
+                SARoles.query(function (recs) {
+                    $scope.sa_roles = recs;
+                });
+            } else {
+                var load = function() {
+                    $scope.permissionMap = {};
+                    console.log('getting role');
+                    SARoles.get($stateParams.roleId, function (data) {
+                        $scope.sa_role = data;
+                        console.log(data);
+                    });
+                    SARoles.getApp($stateParams.roleId, function (data) {
+                        console.log(data);
+                        SAItems.findByApp(data.id, function (recs) {
+                            console.log('got apps');
+                            $scope.sa_app_items = recs;
+                            SAPermissions.findByRole($stateParams.roleId,function(permissions) {
+                                $scope.sa_role_permissions = permissions;
+                                
+                            });
+                        });
+                    });
+                };
+                
+                load();
+                
+                $scope.allowAllItems = function() {
+                    console.log('Allow all items');
+                    var confirmAllowAllItemsPopup = $ionicPopup.confirm({
+                        title: 'Allow  all items',
+                        template: 'Are you sure you want to allow all items for the role: ' + $scope.sa_role.name + '?'
+                    });
+                    confirmAllowAllItemsPopup.then(function (res) {
+                        if (res) {
+                            console.log('You are sure');
+                            SARoles.allowAllItems($scope.sa_role.id, true, function () {
+                                load();
+                            });
+                        } else {
+                            console.log('You are not sure');
+                        }
+                    });
+                };
+                
+                $scope.giveSpecialPermissions = function() {
+                    console.log('Give special permissions');
+                    SARoles.allowAllItems($scope.sa_role.id, false, function () {
+                        load();
+                    });
+                };
+            }
+        })
         .controller('SAAppsCtrl', function ($scope, $ionicModal, SAApps) {
             console.log('getting apps');
             SAApps.query(function (recs) {
                 $scope.sa_apps = recs;
             });
         })
-        .controller('SAAppsCtrl', function ($scope, $ionicModal, $ionicPopup, $stateParams, SAApps, SAItems) {
+        .controller('SAAppsCtrl', function ($scope, $ionicModal, $ionicPopup, $stateParams, SAApps, SAItems, SARoles) {
             if (typeof $stateParams.appId === 'undefined') {
                 console.log('getting app no id ');
                 SAApps.query(function (recs) {
@@ -384,6 +438,9 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 });
                 SAItems.findByApp($stateParams.appId, function (recs) {
                     $scope.sa_app_items = recs;
+                });
+                SARoles.findByApp($stateParams.appId, function (recs) {
+                    $scope.sa_app_roles = recs;
                 });
 
                 // Form data for the item modal
@@ -408,8 +465,8 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 };
 
                 // Open the edit item dialog
-                $scope.showEditItem = function (field) {
-                    $scope.itemData = field;
+                $scope.showEditItem = function (item) {
+                    $scope.itemData = item;
                     $scope.itemModal.show();
                 };
 
@@ -418,7 +475,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     $scope.itemData = item;
                     var confirmDeleteItemPopup = $ionicPopup.confirm({
                         title: 'Delete Item',
-                        template: 'Are you sure you want to item the record: ' + item.id + '?'
+                        template: 'Are you sure you want to delete the item: ' + item.id + '?'
                     });
                     confirmDeleteItemPopup.then(function (res) {
                         if (res) {
@@ -446,6 +503,71 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         });
                     });
                     console.log('Saved item', item);
+                };
+                
+                
+                // Form data for the role modal
+                $scope.roleData = {
+                    name: "",
+                    allItemsAllowed: true
+                };
+
+                // Create the role modal that we will use later
+                $ionicModal.fromTemplateUrl('templates/save_role.html', {
+                    scope: $scope
+                }).then(function (modal) {
+                    $scope.roleModal = modal;
+                });
+
+                // Triggered in the role modal to close it
+                $scope.closeSaveRole = function () {
+                    $scope.roleModal.hide();
+                };
+
+                // Open the add role dialog
+                $scope.showAddRole = function () {
+                    $scope.roleData = {};
+                    $scope.roleModal.show();
+                };
+
+                // Open the edit role dialog
+                $scope.showEditRole = function (role) {
+                    $scope.roleData = role;
+                    $scope.roleModal.show();
+                };
+
+                // Open the confirm delete role dialog
+                $scope.showConfirmDeleteRole = function (role) {
+                    $scope.roleData = role;
+                    var confirmDeleteRolePopup = $ionicPopup.confirm({
+                        title: 'Delete Role',
+                        template: 'Are you sure you want to delete the role: ' + role.id + '?'
+                    });
+                    confirmDeleteRolePopup.then(function (res) {
+                        if (res) {
+                            console.log('You are sure');
+                            SARoles.delete($scope.roleData, function (data) {
+                                SARoles.findByApp($stateParams.appId, function (recs) {
+                                    $scope.sa_app_roles = recs;
+                                });
+                            });
+                        } else {
+                            console.log('You are not sure');
+                        }
+                    });
+                };
+
+                // Perform the save action when the user submits the role form
+                $scope.saveRole = function () {
+                    $scope.closeSaveRole();
+                    var role = $scope.roleData;
+                    console.log('Saving role', role);
+                    role.app = $scope.sa_app._links.self.href;
+                    SARoles.save(role, function (data) {
+                        SARoles.findByApp($stateParams.appId, function (recs) {
+                            $scope.sa_app_roles = recs;
+                        });
+                    });
                 };
             }
         })

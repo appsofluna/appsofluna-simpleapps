@@ -1,0 +1,59 @@
+<!--
+Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+All rights reserved.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<ion-view view-title="Role">
+  <ion-content>
+    <div class="list card">
+      <div class="item">
+        <h3>{{sa_role.name}}</h3>
+      </div>
+      <div class="item item-body">
+        <p>
+            <button class="button" ng-show="!sa_role.allItemsAllowed" ng-click="allowAllItems()">Allow all items</button>
+            <button class="button" ng-show="sa_role.allItemsAllowed" ng-click="giveSpecialPermissions()">Give special permissions</button>
+        </p>
+      </div>
+    </div>
+    <div class="list card" ng-show="!sa_role.allItemsAllowed">
+      <div class="item">
+        <h2>Permissions</h2>
+      </div>
+      <div class="item">
+        <ion-list>
+          <ion-item class="row">
+              <div class="col" >Item</div>
+              <div class="col" ></div>
+              <div class="col" >Allow</div>
+              <div class="col" ></div>
+              <div class="col" >Create</div>
+              <div class="col" ></div>
+              <div class="col" >Edit</div>
+              <div class="col" ></div>
+              <div class="col" >Delete</div>
+          </ion-item>
+          <ion-item class="row" ng-repeat="sa_item in sa_app_items">
+              <div class="col" ><div class="item">{{sa_item.name}}</div></div>
+              <div class="col" ></div>
+            <div class="col" ><ion-toggle class="toggle-calm ion-android-unlock" ></ion-toggle></div>
+            <div class="col" ></div>
+            <div class="col" ><ion-toggle class="toggle-calm ion-android-add-circle" ></ion-toggle></div>
+            <div class="col" ></div>
+            <div class="col" ><ion-toggle class="toggle-calm ion-edit" ></ion-toggle></div>
+            <div class="col" ></div>
+            <div class="col" ><ion-toggle class="toggle-calm ion-android-delete" ></ion-toggle></div>
+          </ion-item>
+        </ion-list>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>

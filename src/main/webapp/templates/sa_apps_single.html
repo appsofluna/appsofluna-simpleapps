@@ -49,9 +49,7 @@ THE SOFTWARE.
     </div>
     <div class="list card">
       <div class="item">
-        <h2>Items
-          <i class="icon ion-plus-round" ng-click="showAddItem()"></i>
-        </h2>
+        <h2>Items<i class="icon ion-plus-round" ng-click="showAddItem()"></i></h2>
       </div>
       <div class="item">
         <ion-list>
@@ -65,13 +63,15 @@ THE SOFTWARE.
     </div>
     <div class="list card">
       <div class="item">
-        <h2>Roles</h2>
+        <h2>Roles<i class="icon ion-plus-round" ng-click="showAddRole()"></i></h2>
       </div>
       <div class="item">
         <ion-list>
-          <ion-item>Role 1</ion-item>
-          <ion-item>Role 2</ion-item>
-          <ion-item>Role 3</ion-item>
+          <ion-item ng-repeat="sa_role in sa_app_roles">
+            <a href="#/app/sa_role/{{sa_role.id}}">{{sa_role.name}}</a>
+            <i class="icon ion-close-round" ng-click="showConfirmDeleteRole(sa_role)"></i>
+            <i class="icon ion-edit" ng-click="showEditRole(sa_role)"></i>
+          </ion-item>
         </ion-list>
       </div>
     </div>

@@ -12,7 +12,6 @@
  */
 package com.appsofluna.simpleapps.repository;
 
-import com.appsofluna.simpleapps.model.App;
 import com.appsofluna.simpleapps.model.Item;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;

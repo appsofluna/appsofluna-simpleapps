@@ -13,7 +13,10 @@
 package com.appsofluna.simpleapps.repository;
 
 import com.appsofluna.simpleapps.model.Permission;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
@@ -23,4 +26,11 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource(collectionResourceRel = "permission", path = "permission")
 public interface PermissionRepository extends PagingAndSortingRepository<Permission,Long> {
     //PermissionRepository
+    
+    @Modifying
+    @Query("DELETE Permission o WHERE o.role.id = :roleId")
+    public int deleteAllPermissionsFor(@Param("roleId") long roleId);
+    
+    @Query("SELECT o FROM Permission o WHERE o.role.id = :roleId ")
+    public Permission findByRole(@Param("roleId") long roleId);
 }
