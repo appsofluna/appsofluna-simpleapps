@@ -12,7 +12,6 @@
  */
 package com.appsofluna.simpleapps.repository;
 
-import com.appsofluna.simpleapps.model.Item;
 import com.appsofluna.simpleapps.model.Record;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
@@ -28,6 +27,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface RecordRepository extends PagingAndSortingRepository<Record,Long> {
     //RecordRepository
     
-    @Query("SELECT o FROM Field o WHERE o.item.id = :itemId")
-    List<Item> findByItem(@Param("itemId") long itemId);
+    @Query("SELECT o FROM Record o WHERE o.item.id = :itemId")
+    List<Record> findByItem(@Param("itemId") long itemId);
 }

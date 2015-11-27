@@ -38,4 +38,17 @@ public class RoleService {
         roleRepo.save(role);
         permissionRepo.deleteAllPermissionsFor(role.getId());
     }
+    
+    @Transactional
+    public Permission savePermission(Permission permission) {
+        Permission existingPermission = permissionRepo.findByRoleAndItem(permission.getRole().getId(), permission.getItem().getId());
+        if (existingPermission!=null) {
+            existingPermission.setAccessAllowed(permission.isAccessAllowed());
+            existingPermission.setCreateAllowed(permission.isCreateAllowed());
+            existingPermission.setEditAllowed(permission.isEditAllowed());
+            existingPermission.setDeteleAllowed(permission.isDeteleAllowed());
+            permission = existingPermission;
+        }
+        return permissionRepo.save(permission);
+    }
 }

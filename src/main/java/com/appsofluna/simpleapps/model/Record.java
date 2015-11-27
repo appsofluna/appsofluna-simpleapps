@@ -14,8 +14,10 @@ package com.appsofluna.simpleapps.model;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -38,7 +40,7 @@ public class Record extends AbstractEntity implements Serializable {
     @JoinColumn(name="app_user_id")
     private AppUser appUser;
     
-    @OneToMany(mappedBy = "record")
+    @OneToMany(mappedBy = "record",fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     private List<Value> values;
     
     @Column(name="status_no")

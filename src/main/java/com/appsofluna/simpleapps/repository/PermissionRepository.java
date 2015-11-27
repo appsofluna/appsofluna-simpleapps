@@ -31,6 +31,6 @@ public interface PermissionRepository extends PagingAndSortingRepository<Permiss
     @Query("DELETE Permission o WHERE o.role.id = :roleId")
     public int deleteAllPermissionsFor(@Param("roleId") long roleId);
     
-    @Query("SELECT o FROM Permission o WHERE o.role.id = :roleId ")
-    public Permission findByRole(@Param("roleId") long roleId);
+    @Query("SELECT o FROM Permission o WHERE o.role.id = :roleId AND o.item.id = :itemId")
+    public Permission findByRoleAndItem(@Param("roleId") long roleId, @Param("itemId") long itemId);
 }

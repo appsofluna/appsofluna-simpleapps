@@ -49,6 +49,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 SALogin.login($scope.loginData.username,$scope.loginData.password,function(res_auth) {
                     $rootScope.authenticated = res_auth;
                     $rootScope.username =  $scope.loginData.username;
+                    load();
                     $scope.closeLogin();
                 });
                 // Simulate a login delay. Remove this and replace with your login
@@ -62,11 +63,16 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
             //$scope.authenticated = false;
             
             //loading the apps
-            if ($rootScope.authenticated) {
-                SAApps.query(function (recs) {
-                    $scope.sa_apps = recs;
-                });
-            }
+            var load = function() {
+                if ($rootScope.authenticated) {
+                    SAApps.query(function (recs) {
+                        $scope.sa_apps = recs;
+                    });
+                }
+            };
+            
+            
+            load();
 
             // Form data for the app modal
             $scope.appData = {};
@@ -107,9 +113,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     if (res) {
                         console.log('You are sure');
                         SAApps.delete($scope.appData, function () {
-                            SAApps.query(function (recs) {
-                                $scope.sa_apps = recs;
-                            });
+                            load();
                         });
                     } else {
                         console.log('You are not sure');
@@ -125,9 +129,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 SAApps.save(app, function (data) {
                     console.log('res-start');
                     console.log(data);
-                    SAApps.query(function (recs) {
-                        $scope.sa_apps = recs;
-                    });
+                    load();
                     console.log('res-end');
                 });
             };
@@ -205,6 +207,25 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 });
                 SAFields.findByItem($stateParams.itemId, function (recs) {
                     $scope.sa_item_fields = recs;
+                    SARecords.findByItem($stateParams.itemId, function (recs) {
+                        $scope.sa_item_records = recs;
+                        $scope.recordIds = {}
+                        for (var sa_record_no in $scope.sa_item_records) {
+                            var sa_record = $scope.sa_item_records[sa_record_no];
+                            $scope.recordIds[sa_record.id] = sa_record;
+                        }
+                        for (var sa_record_id in $scope.recordIds) {
+                            var sa_record = $scope.recordIds[sa_record_id];
+                            sa_record.fieldValues = {};
+                            for (var sa_field_no in $scope.sa_item_fields) {
+                                var sa_field = $scope.sa_item_fields[sa_field_no];
+                                sa_record.fieldValues[sa_field.id] = "not coded yet " + sa_field.id;
+                                SAValues.findByRecordAndField(sa_record.id,sa_field.id,function(sa_value,record_id,field_id) {
+                                    $scope.recordIds[record_id].fieldValues[field_id] =sa_value.content;
+                                });
+                            };
+                        };
+                    });
                 });
                 SARecords.findByItem($stateParams.itemId, function (recs) {
                     $scope.sa_item_records = recs;
@@ -374,25 +395,54 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 var load = function() {
                     $scope.permissionMap = {};
                     console.log('getting role');
-                    SARoles.get($stateParams.roleId, function (data) {
-                        $scope.sa_role = data;
-                        console.log(data);
-                    });
-                    SARoles.getApp($stateParams.roleId, function (data) {
-                        console.log(data);
-                        SAItems.findByApp(data.id, function (recs) {
-                            console.log('got apps');
-                            $scope.sa_app_items = recs;
-                            SAPermissions.findByRole($stateParams.roleId,function(permissions) {
-                                $scope.sa_role_permissions = permissions;
-                                
+                    SARoles.get($stateParams.roleId, function (role_data) {
+                        $scope.sa_role = role_data;
+                        console.log(role_data);
+                        SARoles.getApp($stateParams.roleId, function (data) {
+                            console.log(data);
+                            SAItems.findByApp(data.id, function (recs) {
+                                console.log('got apps');
+                                $scope.sa_app_items = recs;
+                                for (var sa_item_no in $scope.sa_app_items) {
+                                    console.log(sa_item_no);
+                                    var sa_item = $scope.sa_app_items[sa_item_no];
+                                    console.log(sa_item.id);
+                                    SAPermissions.findByRoleAndItem($stateParams.roleId,sa_item.id,function(sa_permission,role_id,item_id) {
+                                        if (!sa_permission) {
+                                            console.log('no permission found for item: ' + item_id);
+                                            $scope.permissionMap[item_id] = {
+                                                accessAllowed: false,
+                                                createAllowed: false,
+                                                editAllowed: false,
+                                                deteleAllowed: false
+                                            };
+                                        } else {
+                                            console.log('permission found for item: ' + item_id);
+                                            $scope.permissionMap[item_id] = sa_permission[0];
+                                        }
+                                    });
+                                };
                             });
                         });
                     });
+                    
                 };
                 
                 load();
                 
+                $scope.permissionChanged = function(sa_item) {
+                    console.log($scope.permissionMap);
+                    console.log('Permission changed for the item: ' +sa_item.name);
+                    var permission = $scope.permissionMap[sa_item.id];
+                    console.log(permission);
+                    permission.role = $scope.sa_role._links.self.href;
+                    permission.item = sa_item._links.self.href;
+                    SAPermissions.save(permission, function (data) {
+                        SAPermissions.findByRoleAndItem($scope.sa_role.id,sa_item.id, function (sa_permission) {
+                            $scope.permissionMap[sa_item] = sa_permission;
+                        });
+                    });
+                };
                 $scope.allowAllItems = function() {
                     console.log('Allow all items');
                     var confirmAllowAllItemsPopup = $ionicPopup.confirm({
@@ -433,16 +483,30 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 });
             } else {
                 console.log('getting app');
-                SAApps.get($stateParams.appId, function (data) {
-                    $scope.sa_app = data;
-                });
-                SAItems.findByApp($stateParams.appId, function (recs) {
-                    $scope.sa_app_items = recs;
-                });
-                SARoles.findByApp($stateParams.appId, function (recs) {
-                    $scope.sa_app_roles = recs;
-                });
-
+                
+                var loadApp = function() {
+                    SAApps.get($stateParams.appId, function (data) {
+                        $scope.sa_app = data;
+                    });
+                };
+                var loadItems = function() {
+                    SAItems.findByApp($stateParams.appId, function (recs) {
+                        $scope.sa_app_items = recs;
+                    });
+                };
+                var loadRoles = function() {
+                    SARoles.findByApp($stateParams.appId, function (recs) {
+                        $scope.sa_app_roles = recs;
+                    });
+                };
+                var load = function() {
+                    loadApp();
+                    loadItems();
+                    loadRoles();
+                };
+                
+                load();
+                
                 // Form data for the item modal
                 $scope.itemData = {};
 
@@ -481,9 +545,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         if (res) {
                             console.log('You are sure');
                             SAItems.delete($scope.itemData, function (data) {
-                                SAItems.findByApp($stateParams.appId, function (recs) {
-                                    $scope.sa_app_items = recs;
-                                });
+                                loadItems();
                             });
                         } else {
                             console.log('You are not sure');
@@ -498,9 +560,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     console.log('Saving item', item);
                     item.app = $scope.sa_app._links.self.href;
                     SAItems.save(item, function (data) {
-                        SAItems.findByApp($stateParams.appId, function (recs) {
-                            $scope.sa_app_items = recs;
-                        });
+                        loadItems();
                     });
                     console.log('Saved item', item);
                 };
@@ -547,9 +607,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         if (res) {
                             console.log('You are sure');
                             SARoles.delete($scope.roleData, function (data) {
-                                SARoles.findByApp($stateParams.appId, function (recs) {
-                                    $scope.sa_app_roles = recs;
-                                });
+                                loadRoles();
                             });
                         } else {
                             console.log('You are not sure');
@@ -564,9 +622,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     console.log('Saving role', role);
                     role.app = $scope.sa_app._links.self.href;
                     SARoles.save(role, function (data) {
-                        SARoles.findByApp($stateParams.appId, function (recs) {
-                            $scope.sa_app_roles = recs;
-                        });
+                        loadRoles();
                     });
                 };
             }

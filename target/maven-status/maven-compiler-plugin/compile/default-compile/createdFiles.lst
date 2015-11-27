@@ -1,4 +1,5 @@
 com/appsofluna/simpleapps/SimpleUserDetailsService.class
+com/appsofluna/simpleapps/controller/PermissionController.class
 com/appsofluna/simpleapps/SimpleCORSFilter.class
 com/appsofluna/simpleapps/model/App.class
 com/appsofluna/simpleapps/SecurityConfig.class
@@ -19,8 +20,10 @@ com/appsofluna/simpleapps/repository/RoleRepository.class
 com/appsofluna/simpleapps/model/Permission.class
 com/appsofluna/simpleapps/model/Field.class
 com/appsofluna/simpleapps/model/Record.class
+com/appsofluna/simpleapps/MainConfig.class
 com/appsofluna/simpleapps/repository/ValueRepository.class
 com/appsofluna/simpleapps/repository/PermissionRepository.class
+com/appsofluna/simpleapps/service/PermissionService.class
 com/appsofluna/simpleapps/repository/FieldRepository.class
 com/appsofluna/simpleapps/repository/UserRepository.class
 com/appsofluna/simpleapps/repository/AppRepository.class

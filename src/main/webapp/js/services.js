@@ -81,10 +81,16 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
             }])
         .factory('SAPermissions', ['$http', function ($http) {
                 var fac = hateoasFac($http, 'permission');
-                fac.findByRole = function (role_id, callback) {
-                    $http.get(fac.facUrl + '/search/findByRole?roleId=' + role_id).success(function (data) {
-                        callback && callback(data._embedded && data._embedded[fac.facName]);
+                fac.findByRoleAndItem = function(role_id,item_id,callback) {
+                    $http.get(fac.facUrl + '/search/findByRoleAndItem?roleId=' + role_id+'&itemId='+item_id).success(function (data) {
+                        callback && callback(data._embedded && data._embedded[fac.facName],role_id,item_id);
                     });
+                };
+                fac.save = function (rec, callback) {
+                    var fnCallback = function (res) {
+                        callback && callback(res);
+                    };
+                    $http.post(fac.facUrl + '/save', rec).then(fnCallback, fnCallback);
                 };
                 return fac;
             }])
@@ -108,6 +114,11 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
             }])
         .factory('SAValues', ['$http', function ($http) {
                 var fac = hateoasFac($http, 'value');
+                fac.findByRecordAndField = function(record_id,field_id,callback) {
+                    $http.get(fac.facUrl + '/search/findByRecordAndField?recordId=' + record_id+'&fieldId='+field_id).success(function (data) {
+                        callback && callback(data._embedded && data._embedded[fac.facName],record_id,field_id);
+                    });
+                };
                 return fac;
             }])
         .factory('SAUsers', ['$http', function ($http) {

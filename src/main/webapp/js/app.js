@@ -44,6 +44,15 @@ angular.module('appsoluna.simpleapps', ['ionic', 'appsoluna.simpleapps.controlle
       }
     }
   })
+  .state('app.live', {
+    url: "/live/:appId",
+    views: {
+      'menuContent': {
+        templateUrl: "templates/live.html",
+        controller: 'SAAppsCtrl'
+      }
+    }
+  })
   .state('app.sa_app', {
     url: "/sa_app/:appId",
     views: {

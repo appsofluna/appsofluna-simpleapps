@@ -44,13 +44,13 @@ THE SOFTWARE.
           <ion-item class="row" ng-repeat="sa_item in sa_app_items">
               <div class="col" ><div class="item">{{sa_item.name}}</div></div>
               <div class="col" ></div>
-            <div class="col" ><ion-toggle class="toggle-calm ion-android-unlock" ></ion-toggle></div>
+              <div class="col" ><ion-toggle class="toggle-calm ion-android-unlock" ng-model="permissionMap[sa_item.id].accessAllowed" ng-change="permissionChanged(sa_item)" ></ion-toggle></div>
             <div class="col" ></div>
-            <div class="col" ><ion-toggle class="toggle-calm ion-android-add-circle" ></ion-toggle></div>
+            <div class="col" ><ion-toggle class="toggle-calm ion-android-add-circle" ng-model="permissionMap[sa_item.id].createAllowed" ng-change="permissionChanged(sa_item)"  ></ion-toggle></div>
             <div class="col" ></div>
-            <div class="col" ><ion-toggle class="toggle-calm ion-edit" ></ion-toggle></div>
+            <div class="col" ><ion-toggle class="toggle-calm ion-edit" ng-model="permissionMap[sa_item.id].editAllowed" ng-change="permissionChanged(sa_item)"  ></ion-toggle></div>
             <div class="col" ></div>
-            <div class="col" ><ion-toggle class="toggle-calm ion-android-delete" ></ion-toggle></div>
+            <div class="col" ><ion-toggle class="toggle-calm ion-android-delete" ng-model="permissionMap[sa_item.id].deteleAllowed"  ng-change="permissionChanged(sa_item)" ></ion-toggle></div>
           </ion-item>
         </ion-list>
       </div>
