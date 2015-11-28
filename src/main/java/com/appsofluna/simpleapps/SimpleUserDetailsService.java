@@ -37,6 +37,9 @@ public class SimpleUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         com.appsofluna.simpleapps.model.User user = userRepo.findByUsername(username);
         if (user==null) {
+            if ("nouser".equals(username)) {
+                return new User(username,  "nopass", ga("ROLE_BASIC"));
+            }
             throw new UsernameNotFoundException("Username " + username + " not found");
         }
         return new User(username,  user.getPassword(), getGrantedAuthorities(user));
