@@ -202,35 +202,47 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 console.log('getting no id ');
             } else {
                 console.log('getting item');
-                SAItems.get($stateParams.itemId, function (rec) {
-                    $scope.sa_item = rec;
-                });
-                SAFields.findByItem($stateParams.itemId, function (recs) {
-                    $scope.sa_item_fields = recs;
-                    SARecords.findByItem($stateParams.itemId, function (recs) {
-                        $scope.sa_item_records = recs;
-                        $scope.recordIds = {}
-                        for (var sa_record_no in $scope.sa_item_records) {
-                            var sa_record = $scope.sa_item_records[sa_record_no];
-                            $scope.recordIds[sa_record.id] = sa_record;
-                        }
-                        for (var sa_record_id in $scope.recordIds) {
-                            var sa_record = $scope.recordIds[sa_record_id];
-                            sa_record.fieldValues = {};
-                            for (var sa_field_no in $scope.sa_item_fields) {
-                                var sa_field = $scope.sa_item_fields[sa_field_no];
-                                sa_record.fieldValues[sa_field.id] = "not coded yet " + sa_field.id;
-                                SAValues.findByRecordAndField(sa_record.id,sa_field.id,function(sa_value,record_id,field_id) {
-                                    $scope.recordIds[record_id].fieldValues[field_id] =sa_value.content;
-                                });
-                            };
-                        };
+                
+                var loadItem = function() {
+                    SAItems.get($stateParams.itemId, function (rec) {
+                        $scope.sa_item = rec;
                     });
-                });
-                SARecords.findByItem($stateParams.itemId, function (recs) {
-                    $scope.sa_item_records = recs;
-                });
+                };
+                var loadRecords = function() {
+                    SAFields.findByItem($stateParams.itemId, function (recs) {
+                        $scope.sa_item_fields = recs;
+                        SARecords.findByItem($stateParams.itemId, function (recs) {
+                            $scope.sa_item_records = recs;
+                            $scope.recordIds = {}
+                            for (var sa_record_no in $scope.sa_item_records) {
+                                var sa_record = $scope.sa_item_records[sa_record_no];
+                                $scope.recordIds[sa_record.id] = sa_record;
+                            }
+                            for (var sa_record_id in $scope.recordIds) {
+                                var sa_record = $scope.recordIds[sa_record_id];
+                                sa_record.fieldValues = {};
+                                for (var sa_field_no in $scope.sa_item_fields) {
+                                    var sa_field = $scope.sa_item_fields[sa_field_no];
+                                    sa_record.fieldValues[sa_field.id] = {
+                                        content: ""
+                                    };
+                                    SAValues.findByRecordAndField(sa_record.id,sa_field.id,function(sa_value,record_id,field_id) {
+                                        if (sa_value) {
+                                            $scope.recordIds[record_id].fieldValues[field_id] =sa_value[0];
+                                        }
+                                    });
+                                };
+                            };
+                        });
+                    });
+                };
+                var load = function () {
+                    loadItem();
+                    loadRecords();
+                };
 
+                load();
+                
                 // Form data for the field modal
                 $scope.fieldData = {};
                 $scope.fieldTypePage = "";
@@ -327,8 +339,8 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 };
 
                 // Open the edit record dialog
-                $scope.showEditRecord = function (field) {
-                    $scope.recordData = field;
+                $scope.showEditRecord = function (record) {
+                    $scope.recordData = record;
                     $scope.recordModal.show();
                 };
 
@@ -343,9 +355,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         if (res) {
                             console.log('You are sure');
                             SARecords.delete($scope.recordData, function () {
-                                SARecords.findByItem($stateParams.itemId, function (recs) {
-                                    $scope.sa_item_records = recs;
-                                });
+                                loadRecords();
                             });
                         } else {
                             console.log('You are not sure');
@@ -359,29 +369,46 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     var record = $scope.recordData;
                     console.log('Saving record', record);
                     record.item = $scope.sa_item._links.self.href;
-                    record.status_no = -1;
+                    record.statusNo = -1;
                     SARecords.save(record, function (saved) {
-                        var record_href = saved.headers('Location');
-                        var lastCallback = function () {
-
+                        var record_href;
+                        if (record.id) {
+                            record_href = record._links.self.href;
+                        } else {
+                            record_href = saved.headers('Location');
+                        }
+                        var lastCallback = {};
+                        
+                        lastCallback.record_href = record_href;
+                        lastCallback.func = function (rec) {
+                            SARecords.byUrl(this.record_href, function(saved_rec) {
+                               saved_rec.statusNo = 1;
+                               console.log('Saved record', saved_rec);
+                               SARecords.save(saved_rec, function (final_rec) {
+                                   console.log('Final record', final_rec);
+                                   loadRecords();
+                               }); 
+                            });
                         };
-                        for (sa_field_sec in $scope.sa_item_fields) {
+                        for (var sa_field_sec in $scope.sa_item_fields) {
                             var sa_field_rec = $scope.sa_item_fields[sa_field_sec];
                             var sa_record_val = {};
+                            if (record.id) {
+                                sa_record_val = $scope.recordIds[record.id].fieldValues[sa_field_rec.id];
+                            }
                             sa_record_val.field = sa_field_rec._links.self.href;
-                            sa_record_val.content = record.fieldValues[sa_field_rec.id];
+                            sa_record_val.content = record.fieldValues[sa_field_rec.id].content;
                             sa_record_val.record = record_href;
-                            lastCallback = function () {
-                                SAValues.save(sa_record_val, lastCallback);
+                            var oldLastCB = lastCallback;
+                            lastCallback = {};
+                            lastCallback.last = oldLastCB;
+                            lastCallback.recd = sa_record_val;
+                            lastCallback.func = function (rec) {
+                                SAValues.save(this.recd, this.last);
                             };
                         }
-                        lastCallback();
-
-                        SARecords.findByItem($stateParams.itemId, function (recs) {
-                            $scope.sa_item_records = recs;
-                        });
+                        lastCallback.func('');
                     });
-                    console.log('Saved record', record);
                 };
             }
         })

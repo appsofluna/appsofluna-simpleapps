@@ -12,7 +12,6 @@
  */
 package com.appsofluna.simpleapps.repository;
 
-import com.appsofluna.simpleapps.model.Permission;
 import com.appsofluna.simpleapps.model.Value;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -28,5 +27,5 @@ public interface ValueRepository extends PagingAndSortingRepository<Value,Long> 
     //ValueRepository
     
     @Query("SELECT o FROM Value o WHERE o.record.id = :recordId AND o.field.id = :fieldId")
-    public Permission findByRecordAndField(@Param("recordId") long recordId, @Param("fieldId") long fieldId);
+    public Value findByRecordAndField(@Param("recordId") long recordId, @Param("fieldId") long fieldId);
 }

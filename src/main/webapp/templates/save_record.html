@@ -23,7 +23,7 @@ THE SOFTWARE.
       <div class="list">
         <label class="item item-input" ng-repeat="sa_field in sa_item_fields">
           <span class="input-label">{{sa_field.name}}</span>
-          <input class="textbox-n" type="{{sa_field.type}}" ng-model="recordData.fieldValues[sa_field.id]" />
+          <input class="textbox-n" type="{{sa_field.type}}" ng-model="recordData.fieldValues[sa_field.id].content" />
         </label>
         <label class="item">
           <button class="button button-block button-positive" type="submit">Save</button>

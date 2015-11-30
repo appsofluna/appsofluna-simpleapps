@@ -18,13 +18,16 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  *
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="simpleapps_permission")
+@Table(name="simpleapps_permission",uniqueConstraints = {
+  @UniqueConstraint(columnNames = {"role_id","item_id"})  
+})
 public class Permission extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
@@ -37,11 +40,11 @@ public class Permission extends AbstractEntity implements Serializable {
     @Column(name = "is_delete_allowed")
     private boolean deteleAllowed;
     
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name="role_id")
     private Role role;
     
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name="item_id")
     private Item item;
 

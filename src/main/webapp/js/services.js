@@ -21,6 +21,11 @@ function hateoasFac($http, name) {
             callback && callback(data._embedded && data._embedded[name]);
         });
     };
+    fac.byUrl = function (by_url, callback) {
+        $http.get(by_url).success(function (data) {
+            callback && callback(data);
+        });
+    };
     fac.get = function (recId, callback) {
         $http.get(HATEOAS_URL + '/' + recId).success(function (data) {
             data.id = recId;
@@ -30,7 +35,12 @@ function hateoasFac($http, name) {
 
     fac.save = function (rec, callback) {
         var fnCallback = function (res) {
-            callback && callback(res);
+            if (callback) {
+                if (callback.func)
+                    callback.func(res);
+                else
+                    callback(res);
+            }
         };
         if (!rec._links) {
             $http.post(HATEOAS_URL, rec).then(fnCallback, fnCallback);
