@@ -24,6 +24,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name="simpleapps_user")
 public class User extends AbstractEntity implements Serializable {
+    public static final String USER_TYPE_ADMIN = "ADMIN";
+    public static final String USER_TYPE_BASIC = "BASIC";
     private static final long serialVersionUID = 1L;
     
     @Column(name = "username", unique = true)

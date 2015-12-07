@@ -13,7 +13,7 @@ THE SOFTWARE.
 
 <ion-modal-view>
   <ion-header-bar>
-    <h1 class="title">Add {{sa_item.name}}</h1>
+    <h1 class="title">Add {{sa_item.label}}</h1>
     <div class="buttons">
       <button class="button button-clear" ng-click="closeSaveRecord()">Close</button>
     </div>
@@ -21,10 +21,34 @@ THE SOFTWARE.
   <ion-content>
     <form ng-submit="saveRecord()">
       <div class="list">
-        <label class="item item-input" ng-repeat="sa_field in sa_item_fields">
+          <div ng-repeat="sa_field in sa_item_fields">
+        <label class="item item-input">
           <span class="input-label">{{sa_field.name}}</span>
-          <input class="textbox-n" type="{{sa_field.type}}" ng-model="recordData.fieldValues[sa_field.id].content" />
+          <div ng-switch="sa_field.type">
+              <span ng-switch-when="range">
+                  <input class="textbox-n" type="range" min="{{fieldFormats[sa_field.id]['min']}}" max="{{fieldFormats[sa_field.id]['max']}}" ng-model="recordData.fieldValues[sa_field.id].content" />
+              </span>
+              <span ng-switch-when="period"></span>
+              <span ng-switch-when="selection"></span>
+              <span ng-switch-when="item">
+              </span>
+              <span ng-switch-default>
+                  <!-- for text,number,date -->
+                  <input class="textbox-n" type="{{sa_field.type}}" ng-model="recordData.fieldValues[sa_field.id].content" />
+              </span>
+          </div>
+          
         </label>
+              <div ng-switch="sa_field.type">
+                  <span ng-switch-when="item">
+                  <ion-item  class="row">
+                   <div class="col" ng-repeat="sa_sub_field in fieldFormats[sa_field.id]['fields']">
+                       {{sa_sub_field.name}}
+                   </div>
+                  </ion-item>
+                  </span>
+              </div>
+          </div>
         <label class="item">
           <button class="button button-block button-positive" type="submit">Save</button>
         </label>

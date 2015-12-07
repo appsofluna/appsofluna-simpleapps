@@ -41,9 +41,45 @@ THE SOFTWARE.
             <option value="item">Item</option>
           </select>
         </label>
-          <div ng-include="fieldTypePage">
-              
+          <div ng-switch="fieldData.type">
+              <span ng-switch-when="range">
+                  <label class="item item-input">
+                    <span class="input-label">Min</span>
+                    <input type="number" ng-model="formatData['min']" max="{{formatData['max']-1}}" />
+                  </label>
+                  <label class="item item-input">
+                    <span class="input-label">Max</span>
+                    <input type="number" min="{{formatData['min']+1}}" ng-model="formatData['max']" />
+                  </label>
+              </span>
+              <span ng-switch-when="period">
+                  
+              </span>
+              <span ng-switch-when="selection">
+                  <label class="item item-input">
+                    <span class="input-label">Options</span>
+                    <input type="text" ng-model="formatData['options']" />
+                  </label>
+                  <label class="item item-input-inset">
+                    <span class="input-label">Multiple?</span>
+                    <input type="checkbox" ng-model="formatData['multiple']" />
+                  </label>
+              </span>
+              <span ng-switch-when="item">
+                  <label class="item item-input">
+                    <span class="input-label">Reference</span>
+                    <select ng-model="formatData['refer']">
+                        <option value="{{itemType.id}}" ng-repeat="itemType in sa_app_items">{{itemType.label}}</option>
+                    </select>
+                  </label>
+              </span>
+              <span ng-switch-default>
+                  <!--text,number,date-->
+              </span>
           </div>
+          <!-- <div ng-include="fieldTypePage">
+              
+          </div> -->
         <label class="item">
           <button class="button button-block button-positive" type="submit">Save</button>
         </label>

@@ -89,24 +89,6 @@ angular.module('appsoluna.simpleapps', ['ionic', 'appsoluna.simpleapps.controlle
       }
     }
   })
-  .state('app.sessions', {
-    url: "/sessions",
-    views: {
-        'menuContent': {
-            templateUrl: "templates/sessions.html",
-            controller: 'SessionsCtrl'
-        }
-    }
-  })
-  .state('app.session', {
-    url: "/session/:sessionId",
-    views: {
-        'menuContent': {
-          templateUrl: "templates/session.html",
-          controller: 'SessionsCtrl'
-      }
-    }
-  })
   .state('app.browse', {
     url: "/browse",
     views: {

@@ -8,11 +8,15 @@ com/appsofluna/simpleapps/model/Item.class
 com/appsofluna/simpleapps/model/Value.class
 com/appsofluna/simpleapps/repository/AppUserRepository.class
 com/appsofluna/simpleapps/RepositoryConfig.class
+com/appsofluna/simpleapps/service/UserService.class
 com/appsofluna/simpleapps/controller/RoleController.class
+com/appsofluna/simpleapps/controller/UserController.class
 com/appsofluna/simpleapps/model/User.class
 com/appsofluna/simpleapps/model/Role.class
+com/appsofluna/simpleapps/controller/TestController.class
 com/appsofluna/simpleapps/SimpleUserDetailsService$1.class
 com/appsofluna/simpleapps/model/AppUser.class
+com/appsofluna/simpleapps/generator/PHPCodeGenerator.class
 com/appsofluna/simpleapps/repository/ItemRepository.class
 com/appsofluna/simpleapps/repository/RecordRepository.class
 com/appsofluna/simpleapps/Application.class

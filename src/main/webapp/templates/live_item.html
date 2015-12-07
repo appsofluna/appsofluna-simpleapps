@@ -11,7 +11,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
 
-<ion-view view-title="{{sa_item.name}}">
+<ion-view view-title="{{sa_item.label}}">
   <ion-content>
     <div class="list card">
       <div class="item item-body">
@@ -34,7 +34,7 @@ THE SOFTWARE.
             </div>
           </ion-item>
           <ion-item class="row" ng-if="!sa_item_records.length">
-           No {{sa_item.name}} found. You can&nbsp;<u ng-click="showAddRecord()">add one</u>.
+           No {{sa_item.label}} found. You can&nbsp;<u ng-click="showAddRecord()">add one</u>.
           <ion-item>
         </ion-list>
       </div>

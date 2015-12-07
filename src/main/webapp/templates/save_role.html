@@ -27,7 +27,7 @@ THE SOFTWARE.
                 </label>
                 <label class="item item-input-inset">
                     <span class="input-label">Are all items allowed?</span>
-                    <input type="checkbox" ng-model="roleData.allItemsAllowed" />
+                    <input type="checkbox" ng-model="roleData.allItemsAllowed" ng-disabled="roleData.id!=null" />
                 </label>
                 <label class="item">
                     <button class="button button-block button-positive" type="submit">Save</button>

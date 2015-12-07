@@ -108,7 +108,13 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                 var fac = hateoasFac($http, 'field');
                 fac.findByItem = function (item_id, callback) {
                     $http.get(fac.facUrl + '/search/findByItem?itemId=' + item_id).success(function (data) {
-                        callback && callback(data._embedded && data._embedded[fac.facName]);
+                        if(callback) {
+                            if (callback.func) {
+                                callback.func(data._embedded && data._embedded[fac.facName]);
+                            } else {
+                                callback(data._embedded && data._embedded[fac.facName]);
+                            }
+                        }
                     });
                 };
                 return fac;
@@ -132,10 +138,14 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                 return fac;
             }])
         .factory('SAUsers', ['$http', function ($http) {
-                return hateoasFac($http, 'user');
-            }])
-        .factory('SASessions', ['$http', function ($http) {
-                return hateoasFac($http, 'session');
+                var fac = hateoasFac($http, 'user');
+                fac.save = function (rec, callback) {
+                    var fnCallback = function (res) {
+                        callback && callback(res);
+                    };
+                    $http.post(fac.facUrl + '/save', rec).then(fnCallback, fnCallback);
+                };
+                return fac;
             }])
         .factory("SALogin", ['$http', '$sessionStorage', function ($http, $sessionStorage ) {
                 var fac = {};

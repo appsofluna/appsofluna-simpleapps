@@ -195,9 +195,6 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
             }
         })
         .controller('SAItemsCtrl', function ($scope, $ionicModal, $ionicPopup, $timeout, $stateParams, SAItems, SAFields, SARecords, SAValues) {
-            SAItems.query(function (recs) {
-                $scope.sa_items = recs;
-            });
             if (typeof $stateParams.itemId === 'undefined') {
                 console.log('getting no id ');
             } else {
@@ -206,11 +203,37 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 var loadItem = function() {
                     SAItems.get($stateParams.itemId, function (rec) {
                         $scope.sa_item = rec;
+                        SAItems.byUrl(rec._links.app.href, function (app) {
+                            SAItems.findByApp(app.id, function (recs) {
+                                $scope.sa_app_items = recs;
+                            });
+                        });
                     });
                 };
                 var loadRecords = function() {
                     SAFields.findByItem($stateParams.itemId, function (recs) {
                         $scope.sa_item_fields = recs;
+                        $scope.fieldFormats = {};
+                        $scope.fieldIds = {};
+                        for (var sa_field_no in $scope.sa_item_fields) {
+                            var sa_field = $scope.sa_item_fields[sa_field_no];
+                            $scope.fieldIds[sa_field.id] = sa_field;
+                            var fieldData = JSON.parse(sa_field.format);
+                            if (fieldData) {
+                                $scope.fieldFormats[sa_field.id] = fieldData;
+                                if (sa_field.type=='item') {
+                                    var cb = {};
+                                    cb.field_id = sa_field.id;
+                                    cb.func = function (recs) {
+                                        console.log('field_id:');
+                                        console.log(this.field_id);
+                                        $scope.fieldFormats[this.field_id]['fields'] = recs;
+                                    };
+                                    SAFields.findByItem(Number(fieldData['refer']), cb);
+                                };
+                            } else
+                                $scope.fieldFormats[sa_field.id] = {};
+                        }
                         SARecords.findByItem($stateParams.itemId, function (recs) {
                             $scope.sa_item_records = recs;
                             $scope.recordIds = {}
@@ -228,7 +251,11 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                                     };
                                     SAValues.findByRecordAndField(sa_record.id,sa_field.id,function(sa_value,record_id,field_id) {
                                         if (sa_value) {
-                                            $scope.recordIds[record_id].fieldValues[field_id] =sa_value[0];
+                                            var record_field_value = sa_value[0];
+                                            if ($scope.fieldIds[field_id].type=='date') {
+                                                record_field_value.content = new Date(record_field_value.content);
+                                            };
+                                            $scope.recordIds[record_id].fieldValues[field_id] = record_field_value;
                                         }
                                     });
                                 };
@@ -244,8 +271,14 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 load();
                 
                 // Form data for the field modal
-                $scope.fieldData = {};
-                $scope.fieldTypePage = "";
+                function resetFieldData() {
+                    $scope.fieldData = {};
+                    $scope.formatData = {};
+                    $scope.formatData['min'] = 0;
+                    $scope.formatData['max'] = 10;
+                    $scope.fieldTypePage = "";
+                }
+                resetFieldData();
                 $scope.fieldTypeCheck = function () {
                     if ($scope.fieldData.type === 'item') {
                         $scope.fieldTypePage = 'templates/field_types/item.html';
@@ -269,15 +302,21 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
 
                 // Open the add field dialog
                 $scope.showAddFiled = function () {
-                    $scope.fieldData = {};
+                    resetFieldData();
                     $scope.fieldModal.show();
                 };
 
                 // Open the edit field dialog
-                $scope.showEditFiled = function (field) {
-                    $scope.fieldData = field;
-                    $scope.fieldTypeCheck();
-                    $scope.fieldModal.show();
+                $scope.showEditFiled = function (fieldRec) {
+                    resetFieldData();
+                    SAFields.get(fieldRec.id, function (field) {
+                        $scope.fieldData = field;
+                        var formatData = JSON.parse(field.format);
+                        if(formatData)
+                            $scope.formatData = formatData;
+                        $scope.fieldTypeCheck();
+                        $scope.fieldModal.show();
+                    });
                 };
 
                 // Open the confirm delete field dialog
@@ -291,9 +330,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         if (res) {
                             console.log('You are sure');
                             SAFields.delete($scope.fieldData, function () {
-                                SAFields.findByItem($stateParams.itemId, function (recs) {
-                                    $scope.sa_item_fields = recs;
-                                });
+                                loadRecords();
                             });
                         } else {
                             console.log('You are not sure');
@@ -306,6 +343,11 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     $scope.closeSaveField();
                     var field = $scope.fieldData;
                     field.item = $scope.sa_item._links.self.href;
+                    console.log('$scope.formatData:');
+                    
+                    field.format = JSON.stringify($scope.formatData);
+                    console.log('field.format:');
+                    console.log(field.format);
                     SAFields.save(field, function () {
                         SAFields.findByItem($stateParams.itemId, function (recs) {
                             $scope.sa_item_fields = recs;
@@ -566,7 +608,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     $scope.itemData = item;
                     var confirmDeleteItemPopup = $ionicPopup.confirm({
                         title: 'Delete Item',
-                        template: 'Are you sure you want to delete the item: ' + item.id + '?'
+                        template: 'Are you sure you want to delete the item: ' + item.label + '?'
                     });
                     confirmDeleteItemPopup.then(function (res) {
                         if (res) {
@@ -592,6 +634,12 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     console.log('Saved item', item);
                 };
                 
+                $scope.labelChanged = function() {
+                    var label = $scope.itemData.label;
+                    if(label && label.length>0) {
+                        $scope.itemData.name = label.toLowerCase().replace(new RegExp(' ','g'),'_');
+                    };
+                };
                 
                 // Form data for the role modal
                 $scope.roleData = {
@@ -652,18 +700,5 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         loadRoles();
                     });
                 };
-            }
-        })
-        .controller('SessionsCtrl', function ($scope, Session) {
-            console.log('getting sids');
-            $scope.sessions = Session.query();
-        })
-        .controller('SessionsCtrl', function ($scope, $stateParams, Session) {
-            if (typeof $stateParams.sessionId === 'undefined') {
-                console.log('getting no sid ');
-                $scope.sessions = Session.query();
-            } else {
-                console.log('getting sid ' + $stateParams.sessionId);
-                $scope.session = Session.get({sessionId: $stateParams.sessionId});
             }
         });

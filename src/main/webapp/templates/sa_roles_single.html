@@ -42,7 +42,7 @@ THE SOFTWARE.
               <div class="col" >Delete</div>
           </ion-item>
           <ion-item class="row" ng-repeat="sa_item in sa_app_items">
-              <div class="col" ><div class="item">{{sa_item.name}}</div></div>
+              <div class="col" ><div class="item">{{sa_item.label}}</div></div>
               <div class="col" ></div>
               <div class="col" ><ion-toggle class="toggle-calm ion-android-unlock" ng-model="permissionMap[sa_item.id].accessAllowed" ng-change="permissionChanged(sa_item)" ></ion-toggle></div>
             <div class="col" ></div>
