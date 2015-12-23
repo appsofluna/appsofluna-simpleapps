@@ -32,3 +32,4 @@ com/appsofluna/simpleapps/repository/FieldRepository.class
 com/appsofluna/simpleapps/repository/UserRepository.class
 com/appsofluna/simpleapps/repository/AppRepository.class
 com/appsofluna/simpleapps/service/RoleService.class
+com/appsofluna/simpleapps/service/AppService.class

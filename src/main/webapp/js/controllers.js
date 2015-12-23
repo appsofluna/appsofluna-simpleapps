@@ -236,7 +236,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         }
                         SARecords.findByItem($stateParams.itemId, function (recs) {
                             $scope.sa_item_records = recs;
-                            $scope.recordIds = {}
+                            $scope.recordIds = {};
                             for (var sa_record_no in $scope.sa_item_records) {
                                 var sa_record = $scope.sa_item_records[sa_record_no];
                                 $scope.recordIds[sa_record.id] = sa_record;
@@ -277,6 +277,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     $scope.formatData['min'] = 0;
                     $scope.formatData['max'] = 10;
                     $scope.fieldTypePage = "";
+                    $scope.reference_item_fields = {};
                 }
                 resetFieldData();
                 $scope.fieldTypeCheck = function () {
@@ -287,6 +288,20 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     }
                 };
                 $scope.fieldTypeCheck();
+                
+                $scope.itemReferenceSelected = function () {
+                    if ($scope.formatData['refer']) {
+                        $scope.formatData['refer'] = Number($scope.formatData['refer']);
+                        SAFields.findByItem($scope.formatData['refer'], function (recs) {
+                            $scope.reference_item_fields = recs;
+                        });
+                        if ($scope.formatData['field'])
+                            $scope.formatData['field'] = Number($scope.formatData['field']);
+                    } else {
+                        $scope.reference_item_fields = {};
+                    }
+                };
+                $scope.itemReferenceSelected();
 
                 // Create the field modal that we will use later
                 $ionicModal.fromTemplateUrl('templates/save_field.html', {
@@ -315,6 +330,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         if(formatData)
                             $scope.formatData = formatData;
                         $scope.fieldTypeCheck();
+                        $scope.itemReferenceSelected();
                         $scope.fieldModal.show();
                     });
                 };
@@ -701,4 +717,20 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     });
                 };
             }
+        })
+        .controller('SAGenerateCtrl', function ($scope, $ionicModal, $ionicPopup, $stateParams, SAGenerate) {
+            console.log('loading generate controler');
+            if (typeof $stateParams.appId === 'undefined') {
+                console.log('error: appId is not defined ');
+            };
+            $scope.lang = 'php';
+            SAGenerate.files($scope.lang,$stateParams.appId, function (rec) {
+                $scope.files = rec.files;
+            });
+            $scope.subSource = "";
+            $scope.selectedFile = "";
+            $scope.fileClicked = function(file_name) {
+                $scope.selectedFile = file_name;
+                $scope.subSource = "api/generate/"+$scope.lang+"/"+$stateParams.appId+"/"+file_name;
+            };
         });

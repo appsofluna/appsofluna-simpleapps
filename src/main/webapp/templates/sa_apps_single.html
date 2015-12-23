@@ -11,7 +11,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
 
-<ion-view view-title="Application">
+<ion-view view-title="Simple Apps - Application">
+  <ion-nav-title>Simple Apps - Application: {{sa_app.name}}</ion-nav-title>
   <ion-content>
     <div class="list card">
       <div class="item">
@@ -25,11 +26,7 @@ THE SOFTWARE.
         </div>
         <div class="item">
           <i class="icon ion-filing"></i>
-          JSF
-        </div>
-        <div class="item">
-          <i class="icon ion-filing"></i>
-          PHP
+          <a href="#/app/generate/{{sa_app.id}}">PHP</a>
         </div>
       </div>
       <div class="item tabs tabs-secondary tabs-icon-left">

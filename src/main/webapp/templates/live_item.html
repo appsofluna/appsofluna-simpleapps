@@ -27,7 +27,16 @@ THE SOFTWARE.
             <div class="col"><strong>#</strong></div>
           </ion-item>
           <ion-item class="row" ng-repeat="sa_record in sa_item_records">
-            <div class="col" ng-repeat="sa_field in sa_item_fields">{{sa_record.fieldValues[sa_field.id].content}}</div>
+            <div class="col" ng-repeat="sa_field in sa_item_fields">
+                <span ng-switch="sa_field.type">
+                    <span ng-switch-when="date">
+                        {{sa_record.fieldValues[sa_field.id].content | date:'yyyy-MM-dd'}}
+                    </span>
+                    <span ng-switch-default>
+                        {{sa_record.fieldValues[sa_field.id].content}}
+                    </span>
+                </span>
+            </div>
             <div class="col">
               <i class="icon ion-close-round" ng-click="showConfirmDeleteRecord(sa_record)"></i>
               <i class="icon ion-edit" ng-click="showEditRecord(sa_record)"></i>

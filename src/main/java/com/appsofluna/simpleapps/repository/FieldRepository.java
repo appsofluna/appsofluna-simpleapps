@@ -29,5 +29,5 @@ public interface FieldRepository extends PagingAndSortingRepository<Field,Long> 
     //FieldRepository
     
     @Query("SELECT o FROM Field o WHERE o.item.id = :itemId")
-    List<Item> findByItem(@Param("itemId") long itemId);
+    List<Field> findByItem(@Param("itemId") long itemId);
 }

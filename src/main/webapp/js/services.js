@@ -203,4 +203,13 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                 };
 
                 return fac;
+            }])
+            .factory("SAGenerate", ['$http', function ($http) {
+                var fac = {};
+                fac.files = function (lang, recId,callback) {
+                    $http.get("/api/generate/"+lang+"/"+recId+'/files').success(function (data) {
+                        callback && callback(data);
+                    });
+                };
+                return fac;
             }]);

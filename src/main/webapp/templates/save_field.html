@@ -67,9 +67,15 @@ THE SOFTWARE.
               </span>
               <span ng-switch-when="item">
                   <label class="item item-input">
-                    <span class="input-label">Reference</span>
-                    <select ng-model="formatData['refer']">
-                        <option value="{{itemType.id}}" ng-repeat="itemType in sa_app_items">{{itemType.label}}</option>
+                    <span class="input-label">Reference {{formatData['refer']}}</span>
+                    <select ng-model="formatData['refer']" ng-options="itemType.id as (itemType.label) for itemType in sa_app_items"  ng-change="itemReferenceSelected()">
+                        <option></option>
+                    </select>
+                  </label>
+                  <label class="item item-input">
+                    <span class="input-label">Field</span>
+                    <select ng-model="formatData['field']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields">
+                        <option></option>
                     </select>
                   </label>
               </span>
