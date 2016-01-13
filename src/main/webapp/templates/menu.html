@@ -50,7 +50,7 @@ THE SOFTWARE.
         <ion-item menu-close ng-click="logout()" ng-show="authenticated">
           Logout
         </ion-item>
-        <ion-item menu-close href="#/app/settings">
+        <ion-item menu-close href="#/app/settings" ng-show="authenticated">
           Settings
         </ion-item>
       </ion-list>

@@ -31,6 +31,10 @@ THE SOFTWARE.
               <span ng-switch-when="period"></span>
               <span ng-switch-when="selection"></span>
               <span ng-switch-when="item">
+                  {{fieldFormats[sa_field.id]['field-full'].name}}
+                  <select ng-model="recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">
+                    <option></option>
+                  </select>
               </span>
               <span ng-switch-default>
                   <!-- for text,number,date -->
@@ -39,15 +43,6 @@ THE SOFTWARE.
           </div>
           
         </label>
-              <div ng-switch="sa_field.type">
-                  <span ng-switch-when="item">
-                  <ion-item  class="row">
-                   <div class="col" ng-repeat="sa_sub_field in fieldFormats[sa_field.id]['fields']">
-                       {{sa_sub_field.name}}
-                   </div>
-                  </ion-item>
-                  </span>
-              </div>
           </div>
         <label class="item">
           <button class="button button-block button-positive" type="submit">Save</button>

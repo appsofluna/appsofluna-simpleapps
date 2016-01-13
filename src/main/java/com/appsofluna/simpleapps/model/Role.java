@@ -32,7 +32,7 @@ public class Role extends AbstractEntity implements Serializable {
     @JoinColumn(name = "app_id")
     private App app;
     
-    @Column(name = "name")
+    @Column(name = "name",unique = true)
     private String name;
     
     @Column(name = "is_all_items_allowed")
@@ -61,6 +61,4 @@ public class Role extends AbstractEntity implements Serializable {
     public void setAllItemsAllowed(boolean allItemsAllowed) {
         this.allItemsAllowed = allItemsAllowed;
     }
-    
-    
 }

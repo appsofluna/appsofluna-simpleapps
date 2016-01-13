@@ -228,6 +228,12 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                                         console.log('field_id:');
                                         console.log(this.field_id);
                                         $scope.fieldFormats[this.field_id]['fields'] = recs;
+                                        for (var f_rec_no in recs) {
+                                            var f_rec = recs[f_rec_no];
+                                            if (f_rec.id==$scope.fieldFormats[this.field_id]['field']) {
+                                                $scope.fieldFormats[this.field_id]['field-full'] = f_rec;
+                                            };
+                                        };
                                     };
                                     SAFields.findByItem(Number(fieldData['refer']), cb);
                                 };
@@ -390,15 +396,28 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     $scope.recordModal.hide();
                 };
 
+                function loadFieldItems() {
+                    $scope.reference_values = {};
+                    for (var field_id in $scope.fieldIds) {
+                        var sa_field = $scope.fieldIds[field_id];
+                        if (sa_field.type=='item') {
+                            //SAValues.
+                            reference_values[sa_field.id] 
+                        };
+                    };
+                };
+                
                 // Open the add record dialog
                 $scope.showAddRecord = function () {
                     $scope.recordData = {};
+                    loadFieldItems();
                     $scope.recordModal.show();
                 };
 
                 // Open the edit record dialog
                 $scope.showEditRecord = function (record) {
                     $scope.recordData = record;
+                    loadFieldItems();
                     $scope.recordModal.show();
                 };
 
@@ -729,8 +748,11 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
             });
             $scope.subSource = "";
             $scope.selectedFile = "";
+            $scope.showFileContent = false;
+            $scope.zipFile = "api/generate/"+$scope.lang+"/"+$stateParams.appId+"/zip";
             $scope.fileClicked = function(file_name) {
                 $scope.selectedFile = file_name;
+                $scope.showFileContent = true;
                 $scope.subSource = "api/generate/"+$scope.lang+"/"+$stateParams.appId+"/"+file_name;
             };
         });
