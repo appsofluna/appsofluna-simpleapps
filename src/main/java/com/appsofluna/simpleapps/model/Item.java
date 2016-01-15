@@ -35,6 +35,8 @@ public class Item extends AbstractEntity implements Serializable {
     private String name;
     @Column(name = "label")
     private String label;
+    @Column(name = "template")
+    private String template;
 
     public App getApp() {
         return app;
@@ -58,6 +60,14 @@ public class Item extends AbstractEntity implements Serializable {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
     }
     
     
