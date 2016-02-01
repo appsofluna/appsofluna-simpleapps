@@ -56,27 +56,59 @@ THE SOFTWARE.
                   
               </span>
               <span ng-switch-when="selection">
-                  <label class="item item-input">
-                    <span class="input-label">Options</span>
-                    <input type="text" ng-model="formatData['options']" />
-                  </label>
+                  
+                  <div style="width:50%;float:left;">
+                    <label class="item item-input-inset">
+                        <span class="input-label">Options</span>
+                        {{formatData['options']}}
+                    </label>
+                    <label class="item item-input-inset">
+                      <span class="input-label">New options</span>
+                      <input type="text" ng-model="newOption.text" />
+                    </label>
+                  </div>
+                  <div style="width:50%;float: right;">
+                      
+                      <label class="item item-input-inset">
+                        <span class="input-label">Clear Options</span>
+                        <input type="checkbox" ng-model="newOption.clearing"  ng-change="clearOptions()"/>
+                      </label>
+                  <label class="item item-input-inset">
+                        <span class="input-label">Add Options</span>
+                        <input type="checkbox" ng-model="newOption.adding"  ng-change="addNewOption()"/>
+                      </label>
+                  </div>
+                  <br style="clear:both" />
+                  <div style="width:50%;float: right;">
                   <label class="item item-input-inset">
                     <span class="input-label">Multiple?</span>
                     <input type="checkbox" ng-model="formatData['multiple']" />
                   </label>
+                  </div>
+                  <br style="clear:both" />
               </span>
               <span ng-switch-when="item">
                   <label class="item item-input">
-                    <span class="input-label">Reference {{formatData['refer']}}</span>
+                    <span class="input-label">Reference</span>
                     <select ng-model="formatData['refer']" ng-options="itemType.id as (itemType.label) for itemType in sa_app_items"  ng-change="itemReferenceSelected()">
                         <option></option>
                     </select>
                   </label>
                   <label class="item item-input">
                     <span class="input-label">Field</span>
-                    <select ng-model="formatData['field']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields">
+                    <select ng-model="formatData['field']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields" ng-change="fieldReferenceSelected()">
                         <option></option>
                     </select>
+                    <select ng-model="formatData['field2']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields" ng-change="fieldReferenceSelected()">
+                        <option></option>
+                    </select>
+                    <select ng-model="formatData['field3']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields" ng-change="fieldReferenceSelected()">
+                        <option></option>
+                    </select>
+                  </label>
+                  <label class="item item-input">
+                    <span class="input-label">Template</span>
+                    {{formatData['template']}}
                   </label>
               </span>
               <span ng-switch-default>

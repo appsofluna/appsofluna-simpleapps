@@ -11,7 +11,7 @@
  * THE SOFTWARE.
  */
 
-angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.services'])
+angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsoluna.simpleapps.services'])
         .controller('AppCtrl', function ($scope,$rootScope, $ionicModal, $ionicPopup, $timeout, SAApps, SAUsers,SALogin) {
             // Form data for the login modal
             $scope.loginData = {};
@@ -65,6 +65,9 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
             //loading the apps
             var load = function() {
                 if ($rootScope.authenticated) {
+                    SAUsers.getUserByUsername($rootScope.username,function (data) {
+                        $rootScope.user = data;
+                    });
                     SAApps.query(function (recs) {
                         $scope.sa_apps = recs;
                     });
@@ -183,18 +186,102 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 $scope.sa_users = recs;
             });
         })
-        .controller('SAUsersCtrl', function ($scope, $stateParams, SAUsers) {
+        .controller('SAUsersCtrl', function ($scope, $stateParams, SAUsers, SAApps, SARoles) {
             if (typeof $stateParams.userId === 'undefined') {
                 console.log('getting no id ');
                 $scope.sa_users = SAUsers.query();
             } else {
                 console.log('getting user');
-                SAUsers.get($stateParams.userId, function (rec) {
-                    $scope.sa_user = rec;
-                });
+                $scope.app_role_map = {}; //maps app to assigned role
+                $scope.roles_by_app_map = {}; //maps app to list of roles
+                
+                function refreshRole(app_id,user_id) {
+                    var fnAppUserCB = {};
+                    fnAppUserCB.app_id = app_id;
+                    fnAppUserCB.user_id = user_id;
+                    fnAppUserCB.func = function (appUser,appId,userId) {
+                        if (appUser) {
+                            console.log(appUser.id);
+                            $scope.app_role_map[appId].original = appUser.role.id;
+                            $scope.app_role_map[appId].select = appUser.role.id;
+                            $scope.app_role_map[appId].changed = false;
+                        };
+                    };
+                    SAUsers.getAppUser(fnAppUserCB.app_id,fnAppUserCB.user_id, fnAppUserCB);
+                };
+                
+                function updateRole(app_id,user_id,role_id) {
+                    console.log('updating role');
+                    console.log('app_id:' + app_id);
+                    console.log('user_id:' + user_id);
+                    console.log('role_id:' + role_id);
+                    if (role_id)
+                        SAUsers.saveAppUser(app_id,user_id,role_id,function (res) {
+                            refreshRole(app_id,user_id);
+                        });
+                    else
+                        SAUsers.removeAppUser(app_id,user_id,function (res) {
+                            var selection = {};
+                            selection.select = null;
+                            selection.original = null;
+                            selection.changed = false;
+                            $scope.app_role_map[app_id] = selection;
+                            refreshRole(app_id,user_id);
+                        });
+                    console.log('updating done');
+                }
+                var loadApps = function() {
+                    SAApps.query(function (recs) {
+                            $scope.sa_apps = recs;
+                            for (sa_app_index in $scope.sa_apps) {
+                                sa_app = $scope.sa_apps[sa_app_index];
+                                var cbObject = {};
+                                cbObject.app_id = sa_app.id;
+                                cbObject.func = function(sa_app_roles,cbObj) {
+                                    $scope.roles_by_app_map[cbObj.app_id]= sa_app_roles;
+                                };
+                                SARoles.findByApp(sa_app.id,cbObject);
+                                
+                                var selection = {};
+                                selection.select = null;
+                                selection.original = null;
+                                selection.changed = false;
+                                $scope.app_role_map[sa_app.id] = selection;
+                                refreshRole(sa_app.id,$stateParams.userId);
+                            };
+                        });
+                };
+                
+                
+                var load = function() {
+                    SAUsers.get($stateParams.userId, function (rec) {
+                        $scope.sa_user = rec;
+                        SAUsers.getDefaultUsername(function (data) {
+                            $scope.default_username = data;
+                            $scope.default_user_selected = ($scope.default_username==$scope.sa_user.username);
+                        });
+                        loadApps();
+                    });
+                };
+                
+                $scope.roleChanged = function (app_id) {
+                    $scope.app_role_map[app_id].changed = true;
+                };
+                $scope.updateRoleChange = function (app_id) {
+                    if ($scope.app_role_map[app_id].select === $scope.app_role_map[app_id].original) {
+                        $scope.app_role_map[app_id].changed = false;
+                    } else {
+                        updateRole(app_id,$stateParams.userId,$scope.app_role_map[app_id].select);
+                    }
+                };
+                $scope.cancelRoleChange = function (app_id) {
+                    $scope.app_role_map[app_id].select = $scope.app_role_map[app_id].original;
+                    $scope.app_role_map[app_id].changed = false;
+                };
+                load();
             }
         })
-        .controller('SAItemsCtrl', function ($scope, $ionicModal, $ionicPopup, $timeout, $stateParams, SAItems, SAFields, SARecords, SAValues) {
+        .controller('SAItemsCtrl', function ($scope, $rootScope, $ionicModal, $ionicPopup, $timeout, $stateParams, SAItems, SAFields, SARecords, SAValues) {
             if (typeof $stateParams.itemId === 'undefined') {
                 console.log('getting no id ');
             } else {
@@ -240,6 +327,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                             } else
                                 $scope.fieldFormats[sa_field.id] = {};
                         }
+                        loadFieldItems();
                         SARecords.findByItem($stateParams.itemId, function (recs) {
                             $scope.sa_item_records = recs;
                             $scope.recordIds = {};
@@ -270,12 +358,14 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     });
                 };
                 var load = function () {
+                    $scope.current_user_role = $rootScope.user;
                     loadItem();
                     loadRecords();
                 };
 
                 load();
                 
+                $scope.newOption = {};
                 // Form data for the field modal
                 function resetFieldData() {
                     $scope.fieldData = {};
@@ -283,7 +373,11 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     $scope.formatData['min'] = 0;
                     $scope.formatData['max'] = 10;
                     $scope.fieldTypePage = "";
+                    $scope.newOption.text = '';
+                    $scope.newOption.adding = false;
+                    $scope.addNewOptionText = false;
                     $scope.reference_item_fields = {};
+                    $scope.reference_item_fields_by_id = {};
                 }
                 resetFieldData();
                 $scope.fieldTypeCheck = function () {
@@ -293,22 +387,79 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                         $scope.fieldTypePage = '';
                     }
                 };
+                $scope.addNewOption = function() {
+                    console.log('add new op. works');
+                    if ($scope.newOption.adding) {
+                        var options = $scope.formatData['options'];
+                        if (!options) options='';
+                        if ($scope.newOption.text.length>0) {
+                            if (options.length>0) options = options.concat(', ');
+                            options = options.concat($scope.newOption.text);
+                            $scope.formatData['options'] = options;
+                        }
+                    }
+                    $scope.newOption.text = '';
+                    $scope.newOption.adding = false;
+                };
+                $scope.clearOptions = function() {
+                    console.log('clear options');
+                    if ($scope.newOption.clearing) {
+                        $scope.formatData['options'] = '';
+                        $scope.newOption.text = '';
+                        $scope.newOption.clearing = false;
+                    }
+                };
+                
                 $scope.fieldTypeCheck();
                 
                 $scope.itemReferenceSelected = function () {
                     if ($scope.formatData['refer']) {
                         $scope.formatData['refer'] = Number($scope.formatData['refer']);
+                        $scope.reference_item_fields_by_id = {};
                         SAFields.findByItem($scope.formatData['refer'], function (recs) {
                             $scope.reference_item_fields = recs;
+                            for (var refItemFieldNo in recs) {
+                                var refItemField = recs[refItemFieldNo];
+                                $scope.reference_item_fields_by_id[refItemField.id] = refItemField;
+                            }
                         });
-                        if ($scope.formatData['field'])
+                        if($scope.formatData['field'])
                             $scope.formatData['field'] = Number($scope.formatData['field']);
+                        if($scope.formatData['field2'])
+                            $scope.formatData['field2'] = Number($scope.formatData['field2']);
+                        if($scope.formatData['field3'])
+                            $scope.formatData['field3'] = Number($scope.formatData['field3']);
                     } else {
                         $scope.reference_item_fields = {};
+                        $scope.reference_item_fields_by_id = {};
+                        
+                        $scope.formatData['field'] = '';
+                        $scope.formatData['field2'] = '';
+                        $scope.formatData['field3'] = '';
+                        $scope.formatData['template'] = '';
                     }
                 };
                 $scope.itemReferenceSelected();
 
+                $scope.fieldReferenceSelected = function () {
+                    var template = '';
+                    if ($scope.formatData['field']) {
+                        var f_id = Number($scope.formatData['field']);
+                        template = template.concat('{',$scope.reference_item_fields_by_id[f_id].name,'}');
+                    };
+                    if ($scope.formatData['field2']) {
+                        var f_id = Number($scope.formatData['field2']);
+                        if(template.length>0) template = template.concat(' ');
+                        template = template.concat('{',$scope.reference_item_fields_by_id[f_id].name,'}');
+                    };
+                    if ($scope.formatData['field3']) {
+                        var f_id = Number($scope.formatData['field3']);
+                        if(template.length>0) template = template.concat(' ');
+                        template = template.concat('{',$scope.reference_item_fields_by_id[f_id].name,'}');
+                    };
+                    $scope.formatData['template'] = template;
+                };
+                
                 // Create the field modal that we will use later
                 $ionicModal.fromTemplateUrl('templates/save_field.html', {
                     scope: $scope
@@ -371,9 +522,10 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     console.log('field.format:');
                     console.log(field.format);
                     SAFields.save(field, function () {
-                        SAFields.findByItem($stateParams.itemId, function (recs) {
-                            $scope.sa_item_fields = recs;
-                        });
+                        loadRecords();
+//                        SAFields.findByItem($stateParams.itemId, function (recs) {
+//                            $scope.sa_item_fields = recs;
+//                        });
                     });
 
                     console.log('Added field', field);
@@ -383,6 +535,8 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 // Form data for the record modal
                 $scope.recordData = {};
                 $scope.recordData.fieldValues = {};
+                $scope.optionsDbA = {};
+                $scope.optionsDbB = {};
 
                 // Create the record modal that we will use later
                 $ionicModal.fromTemplateUrl('templates/save_record.html', {
@@ -397,15 +551,58 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 };
 
                 function loadFieldItems() {
+                    //$scope.reference_values
+                    //is a map of <field_id,list of recordDisplay>
+                    //for recordDisplay, has 2 fields
+                    //id: the id of the record object
+                    //label: the display label for the record object
+                    //the label can be taken via getRecordLabel method
                     $scope.reference_values = {};
+                    $scope.reference_values_by_id = {};
+                    $scope.selection_values = {};
                     for (var field_id in $scope.fieldIds) {
                         var sa_field = $scope.fieldIds[field_id];
                         if (sa_field.type=='item') {
-                            //SAValues.
-                            reference_values[sa_field.id] 
+                            var fieldData = $scope.fieldFormats[field_id];
+                            var itemId = Number(fieldData['refer']);
+                            var callback = {};
+                            callback.fieldId = field_id;
+                            callback.func = function(rec_list) {
+                                var recordDisplayList = rec_list;
+                                $scope.reference_values[this.fieldId] = recordDisplayList;
+                                var fieldDataRef = $scope.fieldFormats[this.fieldId];
+                                console.log(this.fieldId);
+                                console.log(fieldDataRef);
+                                var template = fieldDataRef['template'];
+                                for (var rec_no in recordDisplayList) {
+                                    var rec = recordDisplayList[rec_no];
+                                    var cbReplaceRec = {};
+                                    //cbReplaceRec.recordId = rec.id;
+                                    cbReplaceRec.rec = rec;
+                                    cbReplaceRec.fieldId = this.fieldId;
+                                    cbReplaceRec.func = function(label) {
+                                        console.log(label);
+                                        //var recObj = $scope.reference_values[this.fieldId][this.recordId];
+                                        this.rec.label = label;
+                                    };
+                                    SARecords.formatRecord(rec.id,template,cbReplaceRec);
+                                }
+                                var recordDisplayListById = {};
+                                for (var rec_no in recordDisplayList) {
+                                    var rec = recordDisplayList[rec_no];
+                                    recordDisplayListById[rec.id]=rec;
+                                }
+                                $scope.reference_values_by_id[this.fieldId] = recordDisplayListById;
+                            };
+                            SARecords.findByItem(itemId,callback);
+                        } else if (sa_field.type=='selection') {
+                            var fieldData = $scope.fieldFormats[field_id];
+                            var options = fieldData['options'];
+                            $scope.selection_values[field_id] = options.split(', ');
                         };
                     };
                 };
+                
                 
                 // Open the add record dialog
                 $scope.showAddRecord = function () {
@@ -417,8 +614,49 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 // Open the edit record dialog
                 $scope.showEditRecord = function (record) {
                     $scope.recordData = record;
-                    loadFieldItems();
+                    //loadFieldItems();
+                    for(saItemFieldNo in $scope.sa_item_fields) {
+                        var saItemField = $scope.sa_item_fields[saItemFieldNo];
+                        if (saItemField.type=='item') {
+                            var recId = Number($scope.recordData.fieldValues[saItemField.id].content);
+                            if (recId)
+                                $scope.recordData.fieldValues[saItemField.id].content = ($scope.reference_values_by_id[saItemField.id])[recId].id;
+                        } else if(saItemField.type=='period') {
+                            var range = {};
+                            range.isRange = true;
+                            if($scope.recordData.fieldValues[saItemField.id].content) {
+                                console.log($scope.recordData.fieldValues[saItemField.id].content);
+                                var res = $scope.recordData.fieldValues[saItemField.id].content.split("|");
+                                range.dateDbA= moment(res[0]);
+                                range.dateDbB= moment(res[1]);
+                            } else {
+                                range.dateDbA =  moment();
+                                range.dateDbB =  moment();
+                            }
+                            $scope.recordData.fieldValues[saItemField.id].content = range;
+                        }
+                    }
                     $scope.recordModal.show();
+                };
+                
+                $scope.formatRange = function (rangeContent,format,part) {
+                    if (!rangeContent) return '';
+                    var range;
+                    if (rangeContent.isRange) {
+                        range = rangeContent;
+                    } else {
+                        range = {};
+                        range.isRange = true;
+                        var res = rangeContent.split("|");
+                        range.dateDbA= moment(res[0]);
+                        range.dateDbB= moment(res[1]);
+                    }
+                    if (part==='from')
+                        return ''.concat('From: ',range.dateDbA.format(format));
+                    else if (part==='to')
+                        return ''.concat('To: ',range.dateDbB.format(format));
+                    else
+                        return ''.concat('From: ',range.dateDbA.format(format),' ','To: ',range.dateDbB.format(format));
                 };
 
                 // Open the confirm delete record dialog
@@ -474,7 +712,17 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                                 sa_record_val = $scope.recordIds[record.id].fieldValues[sa_field_rec.id];
                             }
                             sa_record_val.field = sa_field_rec._links.self.href;
-                            sa_record_val.content = record.fieldValues[sa_field_rec.id].content;
+                            if(record.fieldValues[sa_field_rec.id].content) {
+                                if (record.fieldValues[sa_field_rec.id].content.isRange) {
+                                    var range = record.fieldValues[sa_field_rec.id].content;
+                                    sa_record_val.content = ''.concat(range.dateDbA,'|',range.dateDbB);
+                                } else {
+                                    sa_record_val.content = record.fieldValues[sa_field_rec.id].content;
+                                }
+                                
+                            } else {
+                                sa_record_val.content = '';
+                            }
                             sa_record_val.record = record_href;
                             var oldLastCB = lastCallback;
                             lastCallback = {};

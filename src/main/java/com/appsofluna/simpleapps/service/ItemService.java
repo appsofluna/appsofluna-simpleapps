@@ -15,15 +15,11 @@ package com.appsofluna.simpleapps.service;
 import com.appsofluna.simpleapps.model.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 import com.appsofluna.simpleapps.model.Item;
 import com.appsofluna.simpleapps.repository.FieldRepository;
 import com.appsofluna.simpleapps.repository.ItemRepository;
 import com.appsofluna.simpleapps.util.ValidationUtils;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,21 +79,8 @@ public class ItemService {
         
         //check if whether the field names exists
         List<Field> fieldsByItem = fieldRepository.findByItem(itemId);
-        List<String> itemFieldNames = new ArrayList<>();
-        for (Field field: fieldsByItem) {
-            itemFieldNames.add(field.getName());
-        }
-        Pattern pattern = Pattern.compile("\\{([^}]*)\\}");
-        Matcher matcher = pattern.matcher(template);
-        List<String> invalidFieldNames = new ArrayList<>();
-        while(matcher.find()) {
-            String fieldName = matcher.group(1);
-            if (!itemFieldNames.contains(fieldName))
-                invalidFieldNames.add(fieldName);
-        }
-        if (!invalidFieldNames.isEmpty()) {
-            String invalidFieldNamesAsString = StringUtils.join(invalidFieldNames,",");
-            logger.error("item field(s) does not exist: {}",invalidFieldNamesAsString);
+        if (!ValidationUtils.validateFields(fieldsByItem, template)) {
+            logger.error("the fields in the template are invalid.");
             return null;
         }
         
@@ -109,4 +92,6 @@ public class ItemService {
         //returns item
         return item;
     }
+
+    
 }

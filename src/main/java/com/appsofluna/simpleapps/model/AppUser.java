@@ -17,21 +17,25 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  *
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="simpleapps_app_user")
+@Table(name="simpleapps_app_user",uniqueConstraints = {
+  @UniqueConstraint(columnNames = {"app_id","user_id"})  
+})
 public class AppUser extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
     @ManyToOne
     @JoinColumn(name="app_id")
     private App app;
-    private String username;
-    private String password;
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
     @ManyToOne
     @JoinColumn(name="role_id")
     private Role role;
@@ -44,20 +48,12 @@ public class AppUser extends AbstractEntity implements Serializable {
         this.app = app;
     }
 
-    public String getUsername() {
-        return username;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Role getRole() {

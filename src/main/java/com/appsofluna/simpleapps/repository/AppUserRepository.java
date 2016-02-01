@@ -13,7 +13,9 @@
 package com.appsofluna.simpleapps.repository;
 
 import com.appsofluna.simpleapps.model.AppUser;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
@@ -23,4 +25,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource(collectionResourceRel = "app_user", path = "app_user")
 public interface AppUserRepository extends PagingAndSortingRepository<AppUser,Long> {
     //AppUserRepository
+    
+    @Query("SELECT o FROM AppUser o WHERE o.app.id = :appId AND o.user.id = :userId")
+    public AppUser findByAppAndUser(@Param("appId") long appId, @Param("userId") long userId);
 }

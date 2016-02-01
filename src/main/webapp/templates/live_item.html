@@ -32,6 +32,14 @@ THE SOFTWARE.
                     <span ng-switch-when="date">
                         {{sa_record.fieldValues[sa_field.id].content | date:'yyyy-MM-dd'}}
                     </span>
+                    <span ng-switch-when="period">
+                        {{formatRange(sa_record.fieldValues[sa_field.id].content,"YYYY-MM-DD",'from')}}
+                        <br/>
+                        {{formatRange(sa_record.fieldValues[sa_field.id].content,"YYYY-MM-DD",'to')}}
+                    </span>
+                    <span ng-switch-when="item">
+                        {{((reference_values_by_id[sa_field.id])[sa_record.fieldValues[sa_field.id].content]).label}}
+                    </span>
                     <span ng-switch-default>
                         {{sa_record.fieldValues[sa_field.id].content}}
                     </span>

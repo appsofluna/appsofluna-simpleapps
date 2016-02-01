@@ -17,8 +17,8 @@ import com.appsofluna.simpleapps.repository.FieldRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +28,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ValueService {
+    private static final Logger logger = LoggerFactory.getLogger(ValueService.class);
+    
     @Autowired
-    private FieldRepository fieldRepo;
+    private FieldRepository fieldRepository;
     
     /**
      * This method retrieves the list of possible values for a given field with "item" type.
@@ -41,7 +43,7 @@ public class ValueService {
         //2.get list of records
         //3.get value field for each record
         
-        Field field = fieldRepo.findOne(fieldId);
+        Field field = fieldRepository.findOne(fieldId);
         if ("item".equalsIgnoreCase(field.getType())) {
             //field refers to an item
             String fieldFormat = field.getFormat();
@@ -51,7 +53,7 @@ public class ValueService {
                 Map fieldFormatMap = oMapper.readValue(fieldFormat, Map.class);
                 System.out.println(fieldFormatMap);
             } catch (IOException ex) {
-                Logger.getLogger(ValueService.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("fails to get field format", ex);
             }
         }
         return null;

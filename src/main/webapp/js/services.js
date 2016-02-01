@@ -74,7 +74,13 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                 var fac = hateoasFac($http, 'role');
                 fac.findByApp = function (app_id, callback) {
                     $http.get(fac.facUrl + '/search/findByApp?appId=' + app_id).success(function (data) {
-                        callback && callback(data._embedded && data._embedded[fac.facName]);
+                        if (callback) {
+                           if (callback.func) {
+                               callback.func(data._embedded && data._embedded[fac.facName],callback);
+                           } else {
+                               callback(data._embedded && data._embedded[fac.facName]);
+                           }
+                        }
                     });
                 };
                 fac.getApp = function (role_id,callback) {
@@ -123,8 +129,26 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                 var fac = hateoasFac($http, 'record');
                 fac.findByItem = function (item_id, callback) {
                     $http.get(fac.facUrl + '/search/findByItem?itemId=' + item_id).success(function (data) {
-                        callback && callback(data._embedded && data._embedded[fac.facName]);
+                        if(callback) {
+                            if (callback.func) {
+                                callback.func(data._embedded && data._embedded[fac.facName]);
+                            } else {
+                                callback(data._embedded && data._embedded[fac.facName]);
+                            }
+                        }
                     });
+                };
+                fac.formatRecord = function (record_id,format, callback) {
+                    var cbS =function (data) {
+                        if(callback) {
+                            if (callback.func) {
+                                callback.func(data);
+                            } else {
+                                callback(data);
+                            }
+                        }
+                    };
+                    $http.get(fac.facUrl + '/' + record_id + '/formatRecord?template=' + format).success(cbS);
                 };
                 return fac;
             }])
@@ -139,11 +163,53 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
             }])
         .factory('SAUsers', ['$http', function ($http) {
                 var fac = hateoasFac($http, 'user');
+                fac.getDefaultUsername = function(callback) {
+                    $http.get(fac.facUrl + '/getDefaultUsername').success(function (data) {
+                        if (callback)
+                            callback(data);
+                    });
+                };
                 fac.save = function (rec, callback) {
                     var fnCallback = function (res) {
                         callback && callback(res);
                     };
                     $http.post(fac.facUrl + '/save', rec).then(fnCallback, fnCallback);
+                };
+                fac.getUserByUsername = function (username, callback) {
+                    $http.get(fac.facUrl + '/findByUsername?username='+username).success(function (data) {
+                        if (callback)
+                            callback(data);
+                    });
+                };
+                fac.getAppUser = function(app_id,user_id,callback) {
+                    $http.get(fac.facUrl + '/findAppUser?appId='+app_id+'&userId='+user_id).success(function (data) {
+                        if (callback) {
+                            if (callback.func) callback = callback.func;
+                            callback(data,app_id,user_id);
+                        }
+                    });
+                };
+                fac.saveAppUser = function (app_id,user_id,role_id, callback) {
+                    var fnCallback = function (res) {
+                        if (callback) {
+                            if (callback.func)
+                                callback.func(res);
+                            else
+                                callback(res);
+                        }
+                    };
+                    $http.post(fac.facUrl + '/saveAppUser?appId='+app_id+'&userId='+user_id+'&roleId='+role_id,null).then(fnCallback, fnCallback);
+                };
+                fac.removeAppUser = function (app_id,user_id, callback) {
+                    var fnCallback = function (res) {
+                        if (callback) {
+                            if (callback.func)
+                                callback.func(res);
+                            else
+                                callback(res);
+                        }
+                    };
+                    $http.post(fac.facUrl + '/removeAppUser?appId='+app_id+'&userId='+user_id,null).then(fnCallback, fnCallback);
                 };
                 return fac;
             }])

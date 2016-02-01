@@ -20,7 +20,45 @@ THE SOFTWARE.
       </div>
       <div class="item item-body">
         <p><button class="button button-positive">Change Password</button></p>
-        <p><button class="button button-assertive">Delete User</button></p>
+        <p>
+            <button class="button button-assertive" ng-disabled="default_user_selected">Delete User</button>
+            <span ng-show="default_user_selected"><br/>Default user cannot be deleted!</span>
+        </p>
+      </div>
+    </div>
+    <div class="list card" >
+      <div class="item">
+        <h2>App Roles</h2>
+        <span ng-show="default_user_selected"><br/>Default user has all the permission, unless a role is assigned.</span>
+      </div>
+      <div class="item">
+        <ion-list>
+          <ion-item class="row">
+              <div class="col" >App</div>
+              <div class="col" ></div>
+              <div class="col" >Role</div>
+              <div class="col" ></div>
+          </ion-item>
+          <ion-item class="row" ng-repeat="sa_app in sa_apps">
+              <div class="col" ><div class="item">{{sa_app.name}}</div></div>
+              <div class="col" ></div>
+              <div class="col">
+                  <label class="item item-input item-select">
+                    <div class="input-label">
+                        &nbsp;
+                    </div>
+                      <select ng-init="app_role_map[sa_app.id].select = app_role_map[sa_app.id].select" ng-model="app_role_map[sa_app.id].select" ng-options="role.id as (role.name) for role in roles_by_app_map[sa_app.id]" ng-change="roleChanged(sa_app.id)">
+                        <option label="(unassigned)"></option>
+                    </select>
+                  </label>
+              </div>
+              <div class="col" ></div>
+              <div class="col" >
+                  <button class="button button-positive" ng-show="app_role_map[sa_app.id].changed" ng-click="updateRoleChange(sa_app.id)">Update</button>
+                  <button class="button button-assertive"  ng-show="app_role_map[sa_app.id].changed" ng-click="cancelRoleChange(sa_app.id)">Cancel</button>
+              </div>
+          </ion-item>
+        </ion-list>
       </div>
     </div>
   </ion-content>

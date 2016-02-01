@@ -28,11 +28,23 @@ THE SOFTWARE.
               <span ng-switch-when="range">
                   <input class="textbox-n" type="range" min="{{fieldFormats[sa_field.id]['min']}}" max="{{fieldFormats[sa_field.id]['max']}}" ng-model="recordData.fieldValues[sa_field.id].content" />
               </span>
-              <span ng-switch-when="period"></span>
-              <span ng-switch-when="selection"></span>
+              <span ng-switch-when="period">
+                  <div>
+                      <div style="float:left;">
+                        <mighty-datepicker id="onedate" ng-model="recordData.fieldValues[sa_field.id].content.dateDbA" options="optionsDbA" before="recordData.fieldValues[sa_field.id].content.dateDbB"></mighty-datepicker>
+                    </div>
+                    <div style="float:right;">
+                        <mighty-datepicker id="twodate" ng-model="recordData.fieldValues[sa_field.id].content.dateDbB" options="optionsDbB" after="recordData.fieldValues[sa_field.id].content.dateDbA"></mighty-datepicker>
+                    </div>
+                  </div>
+              </span>
+              <span ng-switch-when="selection">
+                  <select ng-init="recordData.fieldValues[sa_field.id].content = recordData.fieldValues[sa_field.id].content" ng-model="recordData.fieldValues[sa_field.id].content" ng-options="selection_value as (selection_value) for selection_value in selection_values[sa_field.id]">
+                    <option></option>
+                  </select>
+              </span>
               <span ng-switch-when="item">
-                  {{fieldFormats[sa_field.id]['field-full'].name}}
-                  <select ng-model="recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">
+                  <select ng-init="recordData.fieldValues[sa_field.id].content = recordData.fieldValues[sa_field.id].content" ng-model="recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">
                     <option></option>
                   </select>
               </span>
