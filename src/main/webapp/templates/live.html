@@ -12,16 +12,25 @@ THE SOFTWARE.
 -->
 
 <ion-view view-title="{{sa_app.name}}">
-  <ion-nav-title>{{sa_app.name}} (Role: {{current_user_role.name}})</ion-nav-title>
+  <ion-nav-title>{{sa_app.name}} - Role: {{(current_userinfo.assigned) ? current_userinfo.appuser.role.name : '(unassigned)'}}</ion-nav-title>
   <ion-content>
     <div class="list card">
       <div class="item item-body">
         <p>{{sa_app.description}}</p>
+        <span ng-show="!current_userinfo.assigned">
+            <p>WARNING: A role has not been assigned to this user.</p>
+            <p ng-show="current_userinfo.default">The default user have access to all the items, if a role has not been assigned.</p>
+        </span>
       </div>
     </div>
     <div class="list card">
       <div class="item">
-        <ion-list>
+        <ion-list ng-show="current_userinfo.assigned">
+          <ion-item ng-repeat="sa_item in allowed_sa_app_items" href="#/app/live_item/{{sa_item.id}}">
+            {{sa_item.label}}
+          </ion-item>
+        </ion-list>
+        <ion-list ng-show="(!(current_userinfo.assigned)) && (current_userinfo.default)">
           <ion-item ng-repeat="sa_item in sa_app_items" href="#/app/live_item/{{sa_item.id}}">
             {{sa_item.label}}
           </ion-item>

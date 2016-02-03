@@ -20,6 +20,7 @@ import com.appsofluna.simpleapps.repository.AppRepository;
 import com.appsofluna.simpleapps.repository.AppUserRepository;
 import com.appsofluna.simpleapps.repository.RoleRepository;
 import com.appsofluna.simpleapps.repository.UserRepository;
+import com.appsofluna.simpleapps.util.SAConstraints;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ public class UserService {
      * @param admin whether the new user have administrative rights
      * @return the newly created user
      */
+    @Transactional
     public User createUser(String username, String password, boolean admin) {
         User user = new User();
         user.setUsername(username);
@@ -66,9 +68,33 @@ public class UserService {
      * @param password the new password
      * @return the saved user record
      */
+    @Transactional
     public User changePassword(long userId, String password) {
+        logger.info("changing password for user id: {}", userId);
+        
+        //checking if the user id valid
+        if(userId<0) {
+            logger.error("invalid userId");
+            return null;
+        }
+        
+        //checking if the password is valid
+        if(password==null || password.equals("")) {
+            logger.error("password is empty");
+            return null;
+        }
+        
+        //checking if the user exist
         User user = userRepository.findOne(userId);
+        if(user==null) {
+            logger.error("user does nto exits");
+            return null;
+        }
+        
+        //changing password
         user.setPassword(encodePassword(password));
+        
+        logger.info("password changed");
         return userRepository.save(user);
     }
     
@@ -84,6 +110,7 @@ public class UserService {
      * @param userId user id
      * @return the relevant AppUser record if available, otherwise null
      */
+    @Transactional
     public AppUser getAppUser(long appId, long userId) {
         logger.info("getting app user");
         if (appId<0) {
@@ -216,6 +243,7 @@ public class UserService {
      * @param userId user id
      * @return the id of the removed AppUser
      */
+    @Transactional
     public Long removeAppUser(long appId, long userId) {
         logger.info("removing app user");
         
@@ -230,5 +258,41 @@ public class UserService {
             logger.info("appuser record deleted");
             return appUserId;
         }
+    }
+
+    /**
+     * Removes user if allowed.
+     * Default user cannot be removed.
+     * @param userId the id of the user being removed
+     * @return the id of the removed user, if removal is successful. null otherwise.
+     */
+    @Transactional
+    public Long removeUser(long userId) {
+        logger.info("removing user id: {}", userId);
+        
+        //validating the user id
+        if (userId<0) {
+            logger.error("invalid user id.");
+            return null;
+        }
+        
+        //checking if the user exist
+        User user = userRepository.findOne(userId);
+        if (user==null) {
+            logger.error("the user does not exist.");
+            return null;
+        }
+        
+        //checking if it's the default user
+        if (SAConstraints.DEFAULT_USERNAME.equals(user.getUsername())) {
+            logger.error("the default user cannot be removed.");
+            return null;
+        }
+        
+        //removing user
+        userRepository.delete(user);
+        logger.info("user deleted.");
+        
+        return userId;
     }
 }

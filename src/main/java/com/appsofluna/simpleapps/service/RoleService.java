@@ -46,7 +46,7 @@ public class RoleService {
             existingPermission.setAccessAllowed(permission.isAccessAllowed());
             existingPermission.setCreateAllowed(permission.isCreateAllowed());
             existingPermission.setEditAllowed(permission.isEditAllowed());
-            existingPermission.setDeteleAllowed(permission.isDeteleAllowed());
+            existingPermission.setDeleteAllowed(permission.isDeleteAllowed());
             permission = existingPermission;
         }
         return permissionRepo.save(permission);

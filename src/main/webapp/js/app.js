@@ -13,7 +13,7 @@
 
 // SimpleApps
 // 'appsoluna.simpleapps.controllers' is found in controllers.js
-angular.module('appsoluna.simpleapps', ['ionic', 'hljs','appsoluna.simpleapps.controllers'])
+angular.module('appsoluna.simpleapps', ['ionic', 'hljs','ionic-fancy-select','isteven-multi-select','appsoluna.simpleapps.controllers'])
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -100,6 +100,7 @@ angular.module('appsoluna.simpleapps', ['ionic', 'hljs','appsoluna.simpleapps.co
   })
   .state('app.browse', {
     url: "/browse",
+    cache: false,
     views: {
         'menuContent': {
           templateUrl: "templates/browse.html",
@@ -109,6 +110,7 @@ angular.module('appsoluna.simpleapps', ['ionic', 'hljs','appsoluna.simpleapps.co
   })
   .state('app.settings', {
     url: "/settings",
+    cache: false,
     views: {
         'menuContent': {
           templateUrl: "templates/settings.html",

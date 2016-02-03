@@ -38,7 +38,7 @@ public class Permission extends AbstractEntity implements Serializable {
     @Column(name = "is_edit_allowed")
     private boolean editAllowed;
     @Column(name = "is_delete_allowed")
-    private boolean deteleAllowed;
+    private boolean deleteAllowed;
     
     @ManyToOne(optional = false)
     @JoinColumn(name="role_id")
@@ -72,12 +72,12 @@ public class Permission extends AbstractEntity implements Serializable {
         this.editAllowed = editAllowed;
     }
 
-    public boolean isDeteleAllowed() {
-        return deteleAllowed;
+    public boolean isDeleteAllowed() {
+        return deleteAllowed;
     }
 
-    public void setDeteleAllowed(boolean deteleAllowed) {
-        this.deteleAllowed = deteleAllowed;
+    public void setDeleteAllowed(boolean deleteAllowed) {
+        this.deleteAllowed = deleteAllowed;
     }
 
     public Role getRole() {

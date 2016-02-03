@@ -99,7 +99,12 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                 var fac = hateoasFac($http, 'permission');
                 fac.findByRoleAndItem = function(role_id,item_id,callback) {
                     $http.get(fac.facUrl + '/search/findByRoleAndItem?roleId=' + role_id+'&itemId='+item_id).success(function (data) {
-                        callback && callback(data._embedded && data._embedded[fac.facName],role_id,item_id);
+                        if (callback){
+                            if (callback.func)
+                                callback.func(data._embedded && data._embedded[fac.facName][0],role_id,item_id)
+                            else
+                                callback(data._embedded && data._embedded[fac.facName][0],role_id,item_id)
+                        }
                     });
                 };
                 fac.save = function (rec, callback) {
@@ -175,10 +180,35 @@ angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spri
                     };
                     $http.post(fac.facUrl + '/save', rec).then(fnCallback, fnCallback);
                 };
+                
+                fac.changePassword = function(user_id, password, callback) {
+                    var fnCallback = function (data) {
+                        if (callback) {
+                            if (callback.func)
+                                callback.func(data);
+                            else
+                                callback(data);
+                        };
+                    };
+                    var stringModel = {};
+                    stringModel.string = password;
+                    $http.post(fac.facUrl + '/changePassword?userId='+user_id,stringModel).then(fnCallback, fnCallback);
+                };
+                fac.removeUser = function(user_id, callback) {
+                    var fnCallback = function (data) {
+                        if (callback) {
+                            if (callback.func)
+                                callback.func(data);
+                            else
+                                callback(data);
+                        };
+                    };
+                    $http.post(fac.facUrl + '/removeUser?userId='+user_id,null).then(fnCallback, fnCallback);
+                };
                 fac.getUserByUsername = function (username, callback) {
-                    $http.get(fac.facUrl + '/findByUsername?username='+username).success(function (data) {
+                    $http.get(fac.facUrl + '/search/findByUsername?username='+username).success(function (data) {
                         if (callback)
-                            callback(data);
+                            callback(data._embedded && data._embedded[fac.facName][0]);
                     });
                 };
                 fac.getAppUser = function(app_id,user_id,callback) {

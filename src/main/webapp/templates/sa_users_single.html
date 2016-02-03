@@ -19,9 +19,9 @@ THE SOFTWARE.
           <h3>{{sa_user.username}}</h3>
       </div>
       <div class="item item-body">
-        <p><button class="button button-positive">Change Password</button></p>
+          <p><button class="button button-positive" ng-click="showChangePassword()">Change Password</button></p>
         <p>
-            <button class="button button-assertive" ng-disabled="default_user_selected">Delete User</button>
+            <button class="button button-assertive" ng-disabled="default_user_selected" ng-click="showConfirmDeleteUser()">Delete User</button>
             <span ng-show="default_user_selected"><br/>Default user cannot be deleted!</span>
         </p>
       </div>

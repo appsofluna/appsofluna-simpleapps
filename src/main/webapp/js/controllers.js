@@ -12,7 +12,7 @@
  */
 
 angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsoluna.simpleapps.services'])
-        .controller('AppCtrl', function ($scope,$rootScope, $ionicModal, $ionicPopup, $timeout, SAApps, SAUsers,SALogin) {
+        .controller('AppCtrl', function ($scope,$state,$rootScope, $ionicModal, $ionicPopup, $timeout, SAApps, SAUsers,SALogin) {
             // Form data for the login modal
             $scope.loginData = {};
 
@@ -36,6 +36,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
             $scope.logout = function () {
                 SALogin.logout(function () {
                     $rootScope.authenticated = SALogin.isLoggedIn();
+                    $state.go('app.browse',{},{reload: true});
                 });
             };
             
@@ -66,7 +67,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
             var load = function() {
                 if ($rootScope.authenticated) {
                     SAUsers.getUserByUsername($rootScope.username,function (data) {
-                        $rootScope.user = data;
+                        $rootScope.user_id = data.id;
                     });
                     SAApps.query(function (recs) {
                         $scope.sa_apps = recs;
@@ -157,6 +158,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
             $scope.closeSaveUser = function () {
                 $scope.userModal.hide();
             };
+            
 
             // Open the add user dialog
             $scope.showAddUser = function () {
@@ -186,7 +188,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                 $scope.sa_users = recs;
             });
         })
-        .controller('SAUsersCtrl', function ($scope, $stateParams, SAUsers, SAApps, SARoles) {
+        .controller('SAUsersCtrl', function ($rootScope,$ionicModal, $ionicPopup, $state, $scope, $stateParams, SAUsers, SAApps, SARoles) {
             if (typeof $stateParams.userId === 'undefined') {
                 console.log('getting no id ');
                 $scope.sa_users = SAUsers.query();
@@ -278,10 +280,71 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     $scope.app_role_map[app_id].select = $scope.app_role_map[app_id].original;
                     $scope.app_role_map[app_id].changed = false;
                 };
+                
+                // Create the change password modal
+                $ionicModal.fromTemplateUrl('templates/change_password.html', {
+                    scope: $scope
+                }).then(function (modal) {
+                    $scope.changePasswordModal = modal;
+                });
+                
+                // Triggered in the change password modal to close it
+                $scope.closeChangePassword = function () {
+                    $scope.changePasswordModal.hide();
+                };
+                
+                // Open the change password dialog
+                $scope.showChangePassword = function () {
+                    $scope.changePasswordData = {};
+                    $scope.changePasswordData.username = $scope.sa_user.username;
+                    $scope.changePasswordData.userId = $scope.sa_user.id;
+                    $scope.changePasswordModal.show();
+                };
+
+                // Open the confirm delete item dialog
+                $scope.showConfirmDeleteUser = function () {
+                    var confirmDeleteItemPopup = $ionicPopup.confirm({
+                        title: 'Delete User',
+                        template: 'Are you sure you want to delete the user: ' + $scope.sa_user.username + '?'
+                    });
+                    confirmDeleteItemPopup.then(function (res) {
+                        if (res) {
+                            console.log('You are sure');
+                            SAUsers.removeUser($scope.sa_user.id, function (data) {
+                                $state.transitionTo('app.settings',{},{ reload: true });
+                            });
+                        } else {
+                            console.log('You are not sure');
+                        }
+                    });
+                };
+
+                // Perform the save action when the user submits the user form
+                $scope.changePassword = function () {
+                    var newPassword = $scope.changePasswordData.newPassword;
+                    var confirmPassword = $scope.changePasswordData.confirmPassword;
+                    if(!newPassword || newPassword.length<1) {
+                        $scope.changePasswordData.message = 'invalid password';
+                        return;
+                    } else if (newPassword != confirmPassword) {
+                        $scope.changePasswordData.message = 'passwords does not match';
+                        return;
+                    }
+                    $scope.changePasswordData.newPassword = '';
+                    $scope.changePasswordData.confirmPassword = '';
+                    $scope.closeChangePassword();
+                    SAUsers.changePassword($scope.changePasswordData.userId,newPassword, function (data) {
+                        if (data) {
+                            $scope.changePasswordData.message = 'password changed';
+                        }
+                    });
+                };
+
                 load();
             }
         })
-        .controller('SAItemsCtrl', function ($scope, $rootScope, $ionicModal, $ionicPopup, $timeout, $stateParams, SAItems, SAFields, SARecords, SAValues) {
+        .controller('SAItemsCtrl', function ($scope, $rootScope, $ionicModal, $ionicPopup, $timeout, $stateParams,
+                                            SAItems, SAFields, SARecords, SAValues,SAPermissions,SAUsers) {
             if (typeof $stateParams.itemId === 'undefined') {
                 console.log('getting no id ');
             } else {
@@ -291,6 +354,16 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     SAItems.get($stateParams.itemId, function (rec) {
                         $scope.sa_item = rec;
                         SAItems.byUrl(rec._links.app.href, function (app) {
+                            SAUsers.getAppUser(app.id,$rootScope.user_id,function(data,app_id,user_id) {
+                                $scope.current_userinfo.appuser = data;
+                                if (data) {
+                                    $scope.current_userinfo.assigned = true;
+                                    SAPermissions.findByRoleAndItem($scope.current_userinfo.appuser.role.id,$stateParams.itemId, function(res) {
+                                        $scope.current_userinfo.permission = res;
+                                    });
+                                }
+                            });
+                            
                             SAItems.findByApp(app.id, function (recs) {
                                 $scope.sa_app_items = recs;
                             });
@@ -358,11 +431,16 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     });
                 };
                 var load = function () {
-                    $scope.current_user_role = $rootScope.user;
                     loadItem();
                     loadRecords();
                 };
 
+                $scope.current_userinfo = {};
+                $scope.current_userinfo.assigned = false;
+                SAUsers.getDefaultUsername(function (data) {
+                    $scope.default_username = data;
+                    $scope.current_userinfo.default = ($scope.default_username==$rootScope.username);
+                });
                 load();
                 
                 $scope.newOption = {};
@@ -597,8 +675,18 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                             SARecords.findByItem(itemId,callback);
                         } else if (sa_field.type=='selection') {
                             var fieldData = $scope.fieldFormats[field_id];
-                            var options = fieldData['options'];
-                            $scope.selection_values[field_id] = options.split(', ');
+                            var options = fieldData['options'].split(', ');
+                            console.log(options);
+                            $scope.selection_values[field_id] = [];
+                            for (var op in options) {
+                                $scope.selection_values[field_id].push({
+                                    name: options[op],
+                                    Name: options[op],
+                                    id: options[op],
+                                    text: options[op],
+                                    ticked: false
+                                });
+                            }
                         };
                     };
                 };
@@ -614,6 +702,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                 // Open the edit record dialog
                 $scope.showEditRecord = function (record) {
                     $scope.recordData = record;
+                    $scope.selectionArrays = [];
                     //loadFieldItems();
                     for(saItemFieldNo in $scope.sa_item_fields) {
                         var saItemField = $scope.sa_item_fields[saItemFieldNo];
@@ -634,6 +723,16 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                                 range.dateDbB =  moment();
                             }
                             $scope.recordData.fieldValues[saItemField.id].content = range;
+                        } else if(saItemField.type=='selection') {
+                            var fieldData = $scope.fieldFormats[saItemField.id];
+                            var multiple = fieldData['multiple'];
+                            fieldData['multiple_var'] = (multiple) ? 'multiple' : 'single';
+                            if($scope.recordData.fieldValues[saItemField.id].content) {
+                                if(multiple)
+                                    $scope.selectionArrays[saItemField.id] = $scope.recordData.fieldValues[saItemField.id].content.split(",");
+                                else
+                                    $scope.selectionArrays[saItemField.id] = $scope.recordData.fieldValues[saItemField.id].content;
+                            };
                         }
                     }
                     $scope.recordModal.show();
@@ -712,10 +811,25 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                                 sa_record_val = $scope.recordIds[record.id].fieldValues[sa_field_rec.id];
                             }
                             sa_record_val.field = sa_field_rec._links.self.href;
+                            
+                            if(sa_field_rec.type=='selection') {
+                                var fieldData = $scope.fieldFormats[sa_field_rec.id];
+                                var multiple = fieldData['multiple'];
+                                if (multiple) {
+                                    if($scope.selectionArrays[sa_field_rec.id]) {
+                                        record.fieldValues[sa_field_rec.id].content = $scope.selectionArrays[sa_field_rec.id].join();
+                                    }
+                                } else {
+                                    record.fieldValues[sa_field_rec.id].content = $scope.selectionArrays[sa_field_rec.id];
+                                }
+                            }
+                            
                             if(record.fieldValues[sa_field_rec.id].content) {
                                 if (record.fieldValues[sa_field_rec.id].content.isRange) {
                                     var range = record.fieldValues[sa_field_rec.id].content;
                                     sa_record_val.content = ''.concat(range.dateDbA,'|',range.dateDbB);
+                                } else if (Array.isArray(record.fieldValues[sa_field_rec.id].content)) {
+                                    sa_record_val.content = record.fieldValues[sa_field_rec.id].content.join();
                                 } else {
                                     sa_record_val.content = record.fieldValues[sa_field_rec.id].content;
                                 }
@@ -766,11 +880,11 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                                                 accessAllowed: false,
                                                 createAllowed: false,
                                                 editAllowed: false,
-                                                deteleAllowed: false
+                                                deleteAllowed: false
                                             };
                                         } else {
                                             console.log('permission found for item: ' + item_id);
-                                            $scope.permissionMap[item_id] = sa_permission[0];
+                                            $scope.permissionMap[item_id] = sa_permission;
                                         }
                                     });
                                 };
@@ -827,7 +941,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                 $scope.sa_apps = recs;
             });
         })
-        .controller('SAAppsCtrl', function ($scope, $ionicModal, $ionicPopup, $stateParams, SAApps, SAItems, SARoles) {
+        .controller('SAAppsCtrl', function ($scope,$rootScope, $ionicModal, $ionicPopup, $stateParams, SAApps, SAItems, SARoles, SAUsers,SAPermissions) {
             if (typeof $stateParams.appId === 'undefined') {
                 console.log('getting app no id ');
                 SAApps.query(function (recs) {
@@ -836,14 +950,36 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
             } else {
                 console.log('getting app');
                 
-                var loadApp = function() {
+                var loadApp = function(callback) {
                     SAApps.get($stateParams.appId, function (data) {
                         $scope.sa_app = data;
+                        SAUsers.getAppUser($stateParams.appId,$rootScope.user_id,function(data,app_id,user_id) {
+                            $scope.current_userinfo.appuser = data;
+                            if (data) {
+                                $scope.current_userinfo.assigned = true;
+                            }
+                            callback && callback();
+                        });
                     });
                 };
                 var loadItems = function() {
                     SAItems.findByApp($stateParams.appId, function (recs) {
                         $scope.sa_app_items = recs;
+                        $scope.allowed_sa_app_items = {};
+                        for (sa_app_item_index in recs) {
+                            var sa_app_item = recs[sa_app_item_index];
+                            //get permission
+                            if ($scope.current_userinfo.appuser) {
+                                var callback = {};
+                                callback.item = sa_app_item;
+                                callback.func = function(res) {
+                                    if(res.accessAllowed) {
+                                        $scope.allowed_sa_app_items[this.item.id] = this.item;
+                                    }
+                                };
+                                SAPermissions.findByRoleAndItem($scope.current_userinfo.appuser.role.id,sa_app_item.id, callback);
+                            }
+                        }
                     });
                 };
                 var loadRoles = function() {
@@ -852,11 +988,18 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     });
                 };
                 var load = function() {
-                    loadApp();
-                    loadItems();
-                    loadRoles();
+                    loadApp(function() {
+                        loadItems();
+                        loadRoles();
+                    });
                 };
                 
+                $scope.current_userinfo = {};
+                $scope.current_userinfo.assigned = false;
+                SAUsers.getDefaultUsername(function (data) {
+                    $scope.default_username = data;
+                    $scope.current_userinfo.default = ($scope.default_username==$rootScope.username);
+                });
                 load();
                 
                 // Form data for the item modal
@@ -981,6 +1124,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     role.app = $scope.sa_app._links.self.href;
                     SARoles.save(role, function (data) {
                         loadRoles();
+                        $scope.$apply();
                     });
                 };
             }

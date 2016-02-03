@@ -38,10 +38,20 @@ THE SOFTWARE.
                     </div>
                   </div>
               </span>
+              
               <span ng-switch-when="selection">
-                  <select ng-init="recordData.fieldValues[sa_field.id].content = recordData.fieldValues[sa_field.id].content" ng-model="recordData.fieldValues[sa_field.id].content" ng-options="selection_value as (selection_value) for selection_value in selection_values[sa_field.id]">
-                    <option></option>
-                  </select>
+                  <fancy-select
+                    header-text="Select an option"
+                    items="selection_values[sa_field.id]"
+                    value="selectionArrays[sa_field.id]"
+                    text-property="name"
+                    allow-empty='true'
+                    multi-select="fieldFormats[sa_field.id]['multiple']"
+                    modal-template-url="lib/ionic-fancy-select/templates/modal-template.html"
+                    template-url="lib/ionic-fancy-select/templates/item-template.html"
+                    text="Nothing selected"
+                    >
+                  </fancy-select>
               </span>
               <span ng-switch-when="item">
                   <select ng-init="recordData.fieldValues[sa_field.id].content = recordData.fieldValues[sa_field.id].content" ng-model="recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">

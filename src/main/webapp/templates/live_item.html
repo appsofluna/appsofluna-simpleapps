@@ -12,11 +12,12 @@ THE SOFTWARE.
 -->
 
 <ion-view view-title="{{sa_item.label}}">
+  <ion-nav-title>{{sa_item.label}} - Role: {{(current_userinfo.assigned) ? current_userinfo.appuser.role.name : '(unassigned)'}}</ion-nav-title>
   <ion-content>
     <div class="list card">
       <div class="item item-body">
         <p>{{sa_item.description}}</p>
-        <i class="icon ion-plus-round" ng-click="showAddRecord()"></i>
+        <i class="icon ion-plus-round" ng-click="showAddRecord()" ng-show="(current_userinfo.assigned && current_userinfo.permission.createAllowed) || (!current_userinfo.assigned && current_userinfo.default)"></i>
       </div>
     </div>
     <div class="list card">
@@ -40,14 +41,17 @@ THE SOFTWARE.
                     <span ng-switch-when="item">
                         {{((reference_values_by_id[sa_field.id])[sa_record.fieldValues[sa_field.id].content]).label}}
                     </span>
+                    <span ng-switch-when="selection">
+                        {{sa_record.fieldValues[sa_field.id].content}}
+                    </span>
                     <span ng-switch-default>
                         {{sa_record.fieldValues[sa_field.id].content}}
                     </span>
                 </span>
             </div>
             <div class="col">
-              <i class="icon ion-close-round" ng-click="showConfirmDeleteRecord(sa_record)"></i>
-              <i class="icon ion-edit" ng-click="showEditRecord(sa_record)"></i>
+              <i class="icon ion-close-round" ng-click="showConfirmDeleteRecord(sa_record)" ng-show="(current_userinfo.assigned && current_userinfo.permission.deleteAllowed) || (!current_userinfo.assigned && current_userinfo.default)"></i>
+              <i class="icon ion-edit" ng-click="showEditRecord(sa_record)" ng-show="(current_userinfo.assigned && current_userinfo.permission.editAllowed) || (!current_userinfo.assigned && current_userinfo.default)"></i>
             </div>
           </ion-item>
           <ion-item class="row" ng-if="!sa_item_records.length">
