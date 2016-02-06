@@ -15,26 +15,26 @@ THE SOFTWARE.
   <ion-header-bar>
     <h1 class="title">Add {{sa_item.label}}</h1>
     <div class="buttons">
-      <button class="button button-clear" ng-click="closeSaveRecord()">Close</button>
+      <button class="button button-clear" ng-click="saveRecordDialog.fnClose()">Close</button>
     </div>
   </ion-header-bar>
   <ion-content>
-    <form ng-submit="saveRecord()">
+    <form ng-submit="saveRecordDialog.fnSubmit()">
       <div class="list">
           <div ng-repeat="sa_field in sa_item_fields">
         <label class="item item-input">
-          <span class="input-label">{{sa_field.name}}</span>
+          <span class="input-label">{{sa_field.label}}</span>
           <div ng-switch="sa_field.type">
               <span ng-switch-when="range">
-                  <input class="textbox-n" type="range" min="{{fieldFormats[sa_field.id]['min']}}" max="{{fieldFormats[sa_field.id]['max']}}" ng-model="recordData.fieldValues[sa_field.id].content" />
+                  <input class="textbox-n" type="range" min="{{saveRecordDialog.data.fieldFormats[sa_field.id]['min']}}" max="{{saveRecordDialog.data.fieldFormats[sa_field.id]['max']}}" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" />
               </span>
               <span ng-switch-when="period">
                   <div>
-                      <div style="float:left;">
-                        <mighty-datepicker id="onedate" ng-model="recordData.fieldValues[sa_field.id].content.dateDbA" options="optionsDbA" before="recordData.fieldValues[sa_field.id].content.dateDbB"></mighty-datepicker>
+                    <div style="float:left;">
+                        <mighty-datepicker id="onedate" ng-model="saveRecordDialog.data.periodValues[sa_field.id].dateDbA" options="saveRecordDialog.data.optionsDbA" before="saveRecordDialog.data.recordData.periodValues[sa_field.id].dateDbB"></mighty-datepicker>
                     </div>
                     <div style="float:right;">
-                        <mighty-datepicker id="twodate" ng-model="recordData.fieldValues[sa_field.id].content.dateDbB" options="optionsDbB" after="recordData.fieldValues[sa_field.id].content.dateDbA"></mighty-datepicker>
+                        <mighty-datepicker id="twodate" ng-model="saveRecordDialog.data.periodValues[sa_field.id].dateDbB" options="saveRecordDialog.data.optionsDbB" after="saveRecordDialog.data.recordData.periodValues[sa_field.id].dateDbA"></mighty-datepicker>
                     </div>
                   </div>
               </span>
@@ -43,10 +43,10 @@ THE SOFTWARE.
                   <fancy-select
                     header-text="Select an option"
                     items="selection_values[sa_field.id]"
-                    value="selectionArrays[sa_field.id]"
+                    value="saveRecordDialog.data.selectionArrays[sa_field.id]"
                     text-property="name"
                     allow-empty='true'
-                    multi-select="fieldFormats[sa_field.id]['multiple']"
+                    multi-select="saveRecordDialog.data.mulitAllowed[sa_field.id]"
                     modal-template-url="lib/ionic-fancy-select/templates/modal-template.html"
                     template-url="lib/ionic-fancy-select/templates/item-template.html"
                     text="Nothing selected"
@@ -54,13 +54,13 @@ THE SOFTWARE.
                   </fancy-select>
               </span>
               <span ng-switch-when="item">
-                  <select ng-init="recordData.fieldValues[sa_field.id].content = recordData.fieldValues[sa_field.id].content" ng-model="recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">
+                  <select ng-init="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content = saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">
                     <option></option>
                   </select>
               </span>
               <span ng-switch-default>
                   <!-- for text,number,date -->
-                  <input class="textbox-n" type="{{sa_field.type}}" ng-model="recordData.fieldValues[sa_field.id].content" />
+                  <input class="textbox-n" type="{{sa_field.type}}" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" />
               </span>
           </div>
           

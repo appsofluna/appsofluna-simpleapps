@@ -12,24 +12,24 @@ THE SOFTWARE.
 -->
 
 <ion-view view-title="Simple Apps - User">
-  <ion-nav-title>Simple Apps - User: {{sa_user.username}}</ion-nav-title>
+  <ion-nav-title>Simple Apps - User: {{userForm.data.sa_user.username}}</ion-nav-title>
   <ion-content>
     <div class="list card">
       <div class="item">
-          <h3>{{sa_user.username}}</h3>
+          <h3>{{userForm.data.sa_user.username}}</h3>
       </div>
       <div class="item item-body">
-          <p><button class="button button-positive" ng-click="showChangePassword()">Change Password</button></p>
+          <p><button class="button button-positive" ng-click="changePasswordDialog.fnShow()">Change Password</button></p>
         <p>
-            <button class="button button-assertive" ng-disabled="default_user_selected" ng-click="showConfirmDeleteUser()">Delete User</button>
-            <span ng-show="default_user_selected"><br/>Default user cannot be deleted!</span>
+            <button class="button button-assertive" ng-disabled="userForm.data.default_user_selected" ng-click="confirmDeleteUserPopup.fnShow()">Delete User</button>
+            <span ng-show="userForm.data.default_user_selected"><br/>Default user cannot be deleted!</span>
         </p>
       </div>
     </div>
     <div class="list card" >
       <div class="item">
         <h2>App Roles</h2>
-        <span ng-show="default_user_selected"><br/>Default user has all the permission, unless a role is assigned.</span>
+        <span ng-show="userForm.data.default_user_selected"><br/>Default user has all the permission, unless a role is assigned.</span>
       </div>
       <div class="item">
         <ion-list>
@@ -39,7 +39,7 @@ THE SOFTWARE.
               <div class="col" >Role</div>
               <div class="col" ></div>
           </ion-item>
-          <ion-item class="row" ng-repeat="sa_app in sa_apps">
+          <ion-item class="row" ng-repeat="sa_app in userForm.data.sa_apps">
               <div class="col" ><div class="item">{{sa_app.name}}</div></div>
               <div class="col" ></div>
               <div class="col">
@@ -47,15 +47,15 @@ THE SOFTWARE.
                     <div class="input-label">
                         &nbsp;
                     </div>
-                      <select ng-init="app_role_map[sa_app.id].select = app_role_map[sa_app.id].select" ng-model="app_role_map[sa_app.id].select" ng-options="role.id as (role.name) for role in roles_by_app_map[sa_app.id]" ng-change="roleChanged(sa_app.id)">
+                      <select ng-init="userForm.data.app_role_map[sa_app.id].select = userForm.data.app_role_map[sa_app.id].select" ng-model="userForm.data.app_role_map[sa_app.id].select" ng-options="role.id as (role.name) for role in userForm.data.roles_by_app_map[sa_app.id]" ng-change="userForm.fnRoleChanged(sa_app.id)">
                         <option label="(unassigned)"></option>
                     </select>
                   </label>
               </div>
               <div class="col" ></div>
               <div class="col" >
-                  <button class="button button-positive" ng-show="app_role_map[sa_app.id].changed" ng-click="updateRoleChange(sa_app.id)">Update</button>
-                  <button class="button button-assertive"  ng-show="app_role_map[sa_app.id].changed" ng-click="cancelRoleChange(sa_app.id)">Cancel</button>
+                  <button class="button button-positive" ng-show="userForm.data.app_role_map[sa_app.id].changed" ng-click="userForm.fnUpdateRoleChange(sa_app.id)">Update</button>
+                  <button class="button button-assertive"  ng-show="userForm.data.app_role_map[sa_app.id].changed" ng-click="userForm.fnCancelRoleChange(sa_app.id)">Cancel</button>
               </div>
           </ion-item>
         </ion-list>

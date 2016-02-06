@@ -16,7 +16,7 @@ THE SOFTWARE.
         <div class="list card">
             <div class="item"  >
                 <h2>Applications
-                    <i class="icon ion-plus-round" ng-click="showAddApp()" ng-show="authenticated"></i>
+                    <i class="icon ion-plus-round" ng-click="saveAppDialog.fnShowAdd()" ng-show="authenticated"></i>
                 </h2>
             </div>
             <div class="item" ng-show="authenticated">
@@ -24,13 +24,13 @@ THE SOFTWARE.
                 <ion-list>
                     <ion-item ng-repeat="sa_app in sa_apps">
                         <a href="#/app/sa_app/{{sa_app.id}}">{{sa_app.name}}</a>
-                        <i class="icon ion-close-round" ng-click="showConfirmDeleteApp(sa_app)"></i>
-                        <i class="icon ion-edit" ng-click="showEditApp(sa_app)"></i>
+                        <i class="icon ion-close-round" ng-click="confirmDeleteAppPopup.fnShow(sa_app)"></i>
+                        <i class="icon ion-edit" ng-click="saveAppDialog.fnShowEdit(sa_app)"></i>
                     </ion-item>
                 </ion-list>
             </div>
 
-            <div  class="item"  ng-show="!authenticated" ng-click="login()">
+            <div  class="item"  ng-show="!authenticated" ng-click="loginDialog.fnShow()">
                 <p>Login to see your apps</p>
             </div>
         </div>

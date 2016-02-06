@@ -15,23 +15,23 @@ THE SOFTWARE.
   <ion-header-bar>
     <h1 class="title">Save Field</h1>
     <div class="buttons">
-      <button class="button button-clear" ng-click="closeSaveField()">Close</button>
+      <button class="button button-clear" ng-click="saveFieldDialog.fnClose()">Close</button>
     </div>
   </ion-header-bar>
   <ion-content>
-    <form ng-submit="saveField()">
+    <form ng-submit="saveFieldDialog.fnSubmit()">
       <div class="list">
         <label class="item item-input">
-          <span class="input-label">Field Name</span>
-          <input type="text" ng-model="fieldData.name">
+          <span class="input-label">Field Label</span>
+          <input required="true" type="text" ng-model="saveFieldDialog.data.fieldData.label" ng-change="saveFieldDialog.fnLabelChanged()">
         </label>
         <label class="item item-input">
-          <span class="input-label">Field Label</span>
-          <input type="text" ng-model="fieldData.label">
+          <span class="input-label">Field Name</span>
+          <label>{{saveFieldDialog.data.fieldData.name}}</label>
         </label>
         <label class="item item-input">
           <span class="input-label">Type</span>
-          <select ng-model="fieldData.type" ng-change="fieldTypeCheck()">
+          <select required="true" ng-model="saveFieldDialog.data.fieldData.type" ng-change="saveFieldDialog.fnFieldTypeCheck()">
             <option value="text">Text</option>
             <option value="number">Number</option>
             <option value="range">Range</option>
@@ -41,15 +41,15 @@ THE SOFTWARE.
             <option value="item">Item</option>
           </select>
         </label>
-          <div ng-switch="fieldData.type">
+          <div ng-switch="saveFieldDialog.data.fieldData.type">
               <span ng-switch-when="range">
                   <label class="item item-input">
                     <span class="input-label">Min</span>
-                    <input type="number" ng-model="formatData['min']" max="{{formatData['max']-1}}" />
+                    <input type="number" ng-model="saveFieldDialog.data.formatData['min']" max="{{saveFieldDialog.data.formatData['max']-1}}" />
                   </label>
                   <label class="item item-input">
                     <span class="input-label">Max</span>
-                    <input type="number" min="{{formatData['min']+1}}" ng-model="formatData['max']" />
+                    <input type="number" min="{{saveFieldDialog.data.formatData['min']+1}}" ng-model="saveFieldDialog.data.formatData['max']" />
                   </label>
               </span>
               <span ng-switch-when="period">
@@ -60,29 +60,29 @@ THE SOFTWARE.
                   <div style="width:50%;float:left;">
                     <label class="item item-input-inset">
                         <span class="input-label">Options</span>
-                        {{formatData['options']}}
+                        {{saveFieldDialog.data.formatData['options']}}
                     </label>
                     <label class="item item-input-inset">
                       <span class="input-label">New options</span>
-                      <input type="text" ng-model="newOption.text" />
+                      <input type="text" ng-model="saveFieldDialog.data.newOption.text" />
                     </label>
                   </div>
                   <div style="width:50%;float: right;">
                       
                       <label class="item item-input-inset">
                         <span class="input-label">Clear Options</span>
-                        <input type="checkbox" ng-model="newOption.clearing"  ng-change="clearOptions()"/>
+                        <input type="checkbox" ng-model="saveFieldDialog.data.newOption.clearing"  ng-change="saveFieldDialog.fnClearOptions()"/>
                       </label>
                   <label class="item item-input-inset">
                         <span class="input-label">Add Options</span>
-                        <input type="checkbox" ng-model="newOption.adding"  ng-change="addNewOption()"/>
+                        <input type="checkbox" ng-model="saveFieldDialog.data.newOption.adding"  ng-change="saveFieldDialog.fnAddNewOption()"/>
                       </label>
                   </div>
                   <br style="clear:both" />
                   <div style="width:50%;float: right;">
                   <label class="item item-input-inset">
                     <span class="input-label">Multiple?</span>
-                    <input type="checkbox" ng-model="formatData['multiple']" />
+                    <input type="checkbox" ng-model="saveFieldDialog.data.formatData['multiple']" />
                   </label>
                   </div>
                   <br style="clear:both" />
@@ -90,25 +90,26 @@ THE SOFTWARE.
               <span ng-switch-when="item">
                   <label class="item item-input">
                     <span class="input-label">Reference</span>
-                    <select ng-model="formatData['refer']" ng-options="itemType.id as (itemType.label) for itemType in sa_app_items"  ng-change="itemReferenceSelected()">
+                    <select ng-model="saveFieldDialog.data.formatData['refer']" ng-options="itemType.id as (itemType.label) for itemType in sa_app_items"  ng-change="saveFieldDialog.fnItemReferenceSelected()">
                         <option></option>
                     </select>
                   </label>
                   <label class="item item-input">
                     <span class="input-label">Field</span>
-                    <select ng-model="formatData['field']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields" ng-change="fieldReferenceSelected()">
+                    <select ng-model="saveFieldDialog.data.formatData['field']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
                         <option></option>
                     </select>
-                    <select ng-model="formatData['field2']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields" ng-change="fieldReferenceSelected()">
+                    <select ng-model="saveFieldDialog.data.formatData['field2']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
                         <option></option>
                     </select>
-                    <select ng-model="formatData['field3']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in reference_item_fields" ng-change="fieldReferenceSelected()">
+                    <select ng-model="saveFieldDialog.data.formatData['field3']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
                         <option></option>
                     </select>
                   </label>
                   <label class="item item-input">
                     <span class="input-label">Template</span>
-                    {{formatData['template']}}
+                    {{saveFieldDialog.data.formatData['template']}}
+                    <span ng-show="(!saveFieldDialog.data.formatData['template'] || saveFieldDialog.data.formatData['template'].trim()=='')" >(default template)</span>
                   </label>
               </span>
               <span ng-switch-default>

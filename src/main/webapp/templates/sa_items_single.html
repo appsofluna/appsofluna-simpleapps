@@ -20,11 +20,16 @@ THE SOFTWARE.
       <div class="item item-body">
         <p>{{sa_item.description}}</p>
       </div>
+      <div class="item item-body">
+        <p>
+        <button class="button" ng-click="changeItemTemplateDialog.fnShow()">Template: {{(!sa_item.template || sa_item.template.trim()=='') ? "(default template)" : sa_item.template}}</button>
+        </p>
+      </div>
     </div>
     <div class="list card">
       <div class="item">
         <h2>Fields
-          <i class="icon ion-plus-round" ng-click="showAddFiled()"></i>
+          <i class="icon ion-plus-round" ng-click="saveFieldDialog.fnShowAdd()"></i>
         </h2>
 
       </div>
@@ -33,7 +38,7 @@ THE SOFTWARE.
           <ion-item ng-repeat="sa_field in sa_item_fields">
             {{sa_field.name}}
             <i class="icon ion-close-round" ng-click="showConfirmDeleteFiled(sa_field)"></i>
-            <i class="icon ion-edit" ng-click="showEditFiled(sa_field)"></i>
+            <i class="icon ion-edit" ng-click="saveFieldDialog.fnShowEdit(sa_field)"></i>
           </ion-item>
         </ion-list>
       </div>
@@ -41,15 +46,18 @@ THE SOFTWARE.
     <div class="list card">
       <div class="item">
         <h2>Records
-          <i class="icon ion-plus-round" ng-click="showAddRecord()"></i>
+          <i class="icon ion-plus-round" ng-click="saveRecordDialog.fnShowAdd()"></i>
         </h2>
       </div>
       <div class="item">
         <ion-list>
           <ion-item ng-repeat="sa_record in sa_item_records">
             {{sa_record.id}}
+            <span ng-show="(sa_item.template && sa_item.template.trim()!='')">
+                ({{recordLabels[sa_record.id]}})
+            </span>
             <i class="icon ion-close-round" ng-click="showConfirmDeleteRecord(sa_record)"></i>
-            <i class="icon ion-edit" ng-click="showEditRecord(sa_record)"></i>
+            <i class="icon ion-edit" ng-click="saveRecordDialog.fnShowEdit(sa_record)"></i>
           </ion-item>
         </ion-list>
       </div>

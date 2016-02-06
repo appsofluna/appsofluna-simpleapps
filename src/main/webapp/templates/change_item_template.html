@@ -1,0 +1,42 @@
+<!--
+Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+All rights reserved.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<ion-modal-view>
+  <ion-header-bar>
+    <h1 class="title">Change Item Template</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="changeItemTemplateDialog.fnClose()">Close</button>
+    </div>
+  </ion-header-bar>
+  <ion-content>
+    <form ng-submit="changeItemTemplateDialog.fnSubmit()">
+      <div class="list">
+        <label class="item item-input">
+          <span class="input-label">Template</span>
+          {{changeItemTemplateDialog.data.template}}
+        </label>
+        <label class="item item-input">
+          <span class="input-label">Add a new field</span>
+          <select ng-model="changeItemTemplateDialog.data.newField" ng-options="ref_field as (ref_field.label) for ref_field in changeItemTemplateDialog.data.fields" ng-change="changeItemTemplateDialog.fnNewFieldOnChange()" >
+              <option label="(select to add...)"></option>
+          </select>
+        </label>
+        
+        <div class="item buttons">
+            <button class="button button-n" type="reset" ng-click="changeItemTemplateDialog.fnClear()">Clear</button>
+            <button class="button button-positive" type="submit">Change</button>
+        </div>
+      </div>
+    </form>
+  </ion-content>
+</ion-modal-view>

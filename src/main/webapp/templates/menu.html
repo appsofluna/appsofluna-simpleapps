@@ -25,10 +25,10 @@ THE SOFTWARE.
           <a class="button button-icon button-clear" href="#/app/settings" ng-show="authenticated">
           Logged in as {{username}}
           </a>
-          <button class="button button-icon button-clear" ng-click="login()" ng-show="!authenticated">
+          <button class="button button-icon button-clear" ng-click="loginDialog.fnShow()" ng-show="!authenticated">
           Login
           </button>
-        <button class="button button-icon button-clear" ng-click="logout()" ng-show="authenticated">
+        <button class="button button-icon button-clear" ng-click="loginDialog.fnLogout()" ng-show="authenticated">
           Logout
         </button>
       </ion-nav-buttons>  
@@ -44,10 +44,10 @@ THE SOFTWARE.
         <ion-item menu-close href="#/app/browse">
           Browse
         </ion-item>
-        <ion-item menu-close ng-click="login()" ng-show="!authenticated">
+        <ion-item menu-close ng-click="loginDialog.fnShow()" ng-show="!authenticated">
           Login
         </ion-item>
-        <ion-item menu-close ng-click="logout()" ng-show="authenticated">
+        <ion-item menu-close ng-click="loginDialog.fnLogout()" ng-show="authenticated">
           Logout
         </ion-item>
         <ion-item menu-close href="#/app/settings" ng-show="authenticated">

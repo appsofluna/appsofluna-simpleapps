@@ -24,29 +24,36 @@ THE SOFTWARE.
       <div class="item">
         <ion-list>
           <ion-item class="row">
-            <div class="col" ng-repeat="sa_field in sa_item_fields"><strong>{{sa_field.name}}</strong></div>
+            <div class="col" ng-repeat="sa_field in sa_item_fields"><strong>{{sa_field.label}}</strong></div>
             <div class="col"><strong>#</strong></div>
           </ion-item>
           <ion-item class="row" ng-repeat="sa_record in sa_item_records">
             <div class="col" ng-repeat="sa_field in sa_item_fields">
                 <span ng-switch="sa_field.type">
-                    <span ng-switch-when="date">
-                        {{sa_record.fieldValues[sa_field.id].content | date:'yyyy-MM-dd'}}
-                    </span>
-                    <span ng-switch-when="period">
-                        {{formatRange(sa_record.fieldValues[sa_field.id].content,"YYYY-MM-DD",'from')}}
-                        <br/>
-                        {{formatRange(sa_record.fieldValues[sa_field.id].content,"YYYY-MM-DD",'to')}}
-                    </span>
-                    <span ng-switch-when="item">
-                        {{((reference_values_by_id[sa_field.id])[sa_record.fieldValues[sa_field.id].content]).label}}
-                    </span>
-                    <span ng-switch-when="selection">
-                        {{sa_record.fieldValues[sa_field.id].content}}
-                    </span>
-                    <span ng-switch-default>
-                        {{sa_record.fieldValues[sa_field.id].content}}
-                    </span>
+                    
+                        <span ng-switch-when="date">
+                            <span ng-show="!(sa_record.fieldValues[sa_field.id].content) && sa_record.fieldValues[sa_field.id].content!=''">
+                            {{sa_record.fieldValues[sa_field.id].content | date:'yyyy-MM-dd'}}
+                            </span>
+                        </span>
+                        <span ng-switch-when="period">
+                            <span ng-show="!(sa_record.fieldValues[sa_field.id].content) && sa_record.fieldValues[sa_field.id].content!=''">
+                            {{formatRange(sa_record.fieldValues[sa_field.id].content,"YYYY-MM-DD",'from')}}
+                            <br/>
+                            {{formatRange(sa_record.fieldValues[sa_field.id].content,"YYYY-MM-DD",'to')}}
+                            </span>
+                        </span>
+                        <span ng-switch-when="item">
+                            <span ng-show="!(sa_record.fieldValues[sa_field.id].content) && sa_record.fieldValues[sa_field.id].content!=''">
+                            {{((reference_values_by_id[sa_field.id])[sa_record.fieldValues[sa_field.id].content]).label}}
+                            </span>
+                        </span>
+                        <span ng-switch-when="selection">
+                            {{sa_record.fieldValues[sa_field.id].content}}
+                        </span>
+                        <span ng-switch-default>
+                            {{sa_record.fieldValues[sa_field.id].content}}
+                        </span>
                 </span>
             </div>
             <div class="col">

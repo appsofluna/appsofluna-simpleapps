@@ -15,19 +15,19 @@ THE SOFTWARE.
   <ion-header-bar>
     <h1 class="title">Save App</h1>
     <div class="buttons">
-      <button class="button button-clear" ng-click="closeSaveApp()">Close</button>
+      <button class="button button-clear" ng-click="saveAppDialog.fnClose()">Close</button>
     </div>
   </ion-header-bar>
   <ion-content>
-    <form ng-submit="saveApp()">
+    <form ng-submit="saveAppDialog.fnSubmit()">
       <div class="list">
         <label class="item item-input">
           <span class="input-label">App Name</span>
-          <input type="text" ng-model="appData.name">
+          <input type="text" ng-model="saveAppDialog.data.name">
         </label>
         <label class="item item-input">
           <span class="input-label">App Description</span>
-          <input type="text" ng-model="appData.description">
+          <input type="text" ng-model="saveAppDialog.data.description">
         </label>
         <label class="item">
           <button class="button button-block button-positive" type="submit">Save</button>

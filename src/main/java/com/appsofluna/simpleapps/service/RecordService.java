@@ -13,13 +13,18 @@
 package com.appsofluna.simpleapps.service;
 
 import com.appsofluna.simpleapps.model.Field;
+import com.appsofluna.simpleapps.model.Item;
 import com.appsofluna.simpleapps.model.Record;
 import com.appsofluna.simpleapps.model.Value;
 import com.appsofluna.simpleapps.repository.FieldRepository;
+import com.appsofluna.simpleapps.repository.ItemRepository;
 import com.appsofluna.simpleapps.repository.RecordRepository;
 import com.appsofluna.simpleapps.repository.ValueRepository;
+import com.appsofluna.simpleapps.util.JsonUtil;
+import com.appsofluna.simpleapps.util.SAConstraints;
 import com.appsofluna.simpleapps.util.ValidationUtils;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +47,9 @@ public class RecordService {
     @Autowired
     private ValueRepository valueRepository;
     
+    @Autowired
+    private ItemRepository itemRepository;
+    
     /**
      * This method returns a label by formatting record values based on a given
      * template.
@@ -50,6 +58,18 @@ public class RecordService {
      * @return the formatted label
      */
     public String formatRecord(long recordId, String template) {
+        return formatRecord(recordId,template,true);
+    }
+    
+    /**
+     * This method returns a label by formatting record values based on a given
+     * template.
+     * @param recordId the id of the record
+     * @param template the template string
+     * @param forward whether it should forward item to the formatter;
+     * @return the formatted label
+     */
+    private String formatRecord(long recordId, String template, boolean forward) {
         logger.info("formatting record");
         //1.check if recordId format is valid
         //2.check if template is empty
@@ -102,8 +122,39 @@ public class RecordService {
         String label = template;
         for(Field field: fieldsByItem) {
             String fieldTemplate = "\\{" + field.getName() + "\\}";
-            Value fieldValue = valueRepository.findByRecordAndField(recordId, field.getId());
-            String fieldContent = fieldValue.getContent();
+            long fieldId = field.getId();
+            String fieldContent = "";
+            Value fieldValue = valueRepository.findByRecordAndField(recordId, fieldId);
+            if (fieldValue!=null) {
+                fieldContent = fieldValue.getContent();
+                String type = field.getType();
+                if (forward && SAConstraints.FIELD_TYPE_ITEM.equals(type)) {
+                    try {
+                        long refRecordId = Long.parseLong(fieldContent);
+                        Map<String, Object> formatMap = JsonUtil.stringToMap(field.getFormat());
+                        Object refItemIdObj = formatMap.get(SAConstraints.FIELD_TYPE_ITEM_PARM_REFER);
+                        Long refItemId = null;
+                        if (refItemIdObj instanceof Long) {
+                            refItemId = (Long) refItemIdObj;
+                        } else if (refItemIdObj instanceof String) {
+                            refItemId = Long.parseLong((String)refItemIdObj);
+                        } else {
+                            logger.error("unable to format item because of ref id");
+                            return null;
+                        }
+                        Item refItem = itemRepository.findOne(refItemId);
+                        String refTemplate = refItem.getTemplate();
+                        if (refTemplate!=null && !refTemplate.trim().equals("")) {
+                            fieldContent = formatRecord(refRecordId, refItem.getTemplate(),false);
+                        }
+                    } catch (NumberFormatException nfe) {
+                        logger.error("unable to format item because of number formatting [fieldId={},valueId={},fieldContent={}]",fieldId,fieldValue.getId(),fieldContent);
+                        return null;
+                    }
+                }
+            } else {
+                logger.warn("unable to retrive field value for field id: {} and record id: {}",fieldId,recordId);
+            }
             label = label.replaceAll(fieldTemplate, fieldContent);
         }
         
