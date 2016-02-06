@@ -54,21 +54,24 @@ public class PHPCodeGenerator {
         Map map = new HashMap();
         Set files = new HashSet();
         map.put("files", files);
-        files.add("css/style.css");
-        files.add("index.php");
-        files.add("login.php");
-        files.add("login_form.php");
-        files.add("logout.php");
-        files.add("settings.php");
-        files.add("user_rights_functions.php");
+        files.add("sa-functions.php");
+        files.add("sa-login-form.php");
+        files.add("sa-login.php");
+        files.add("sa-logout.php");
+        files.add("change-password.php");
+        files.add("config.php");
         files.add("data.sql");
+        files.add("index.php");
+        files.add("settings.php");
+        files.add("user-rights.php");
+        files.add("user.php");
+        files.add("css/style.css");
         Map root = appService.getAppForCodeGeneration(appId);
         Set<Map> itemSet = (Set<Map>)((Map)root.get("app")).get("items");
         for (Map itemMap: itemSet) {
-            Long itemId = (Long)itemMap.get("id");
-            String itemIdStr = Long.toString(itemId);
-            files.add(itemIdStr+"_edit.php");
-            files.add(itemIdStr+"_list.php");
+            String itemName = (String)itemMap.get("name");
+            files.add("list/"+itemName+".php");
+            files.add("single/"+itemName+".php");
         }
         return map;
     }
@@ -79,16 +82,26 @@ public class PHPCodeGenerator {
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
         ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
         
-        zipOutputStream.putNextEntry(new ZipEntry("index.php"));
-        ByteArrayInputStream bais = new ByteArrayInputStream(indexDotPHP(appId).getBytes());
-        IOUtils.copy(bais, zipOutputStream);
-        bais.close();
-        zipOutputStream.closeEntry();
+        putContentToPath(zipOutputStream, "sa-functions.php", saDashFunctionsDotPHP());
+        putContentToPath(zipOutputStream, "sa-login-form.php", saDashLoginDashFormDotPHP());
+        putContentToPath(zipOutputStream, "sa-login.php", saDashLoginDotPHP());
+        putContentToPath(zipOutputStream, "sa-logout.php", saDashLogoutDotPHP());
+        putContentToPath(zipOutputStream, "change-password.php", changeDashPasswordDotPHP(appId));
+        putContentToPath(zipOutputStream, "config.php", configDotPHP(appId));
+        putContentToPath(zipOutputStream, "data.sql", dataDotSQL(appId));
+        putContentToPath(zipOutputStream, "index.php", indexDotPHP(appId));
+        putContentToPath(zipOutputStream, "settings.php", settingsDotPHP(appId));
+        putContentToPath(zipOutputStream, "user-rights.php", userDashRightsDotPHP(appId));
+        putContentToPath(zipOutputStream, "user.php", userDotPHP(appId));
+        putContentToPath(zipOutputStream, "/css/style.css", cssSlashStyleDotCSS(appId));
         
-        zipOutputStream.putNextEntry(new ZipEntry("/css/style.css"));
-        bais = new ByteArrayInputStream(cssSlashStyleDotCSS(appId).getBytes());
-        IOUtils.copy(bais, zipOutputStream);
-        bais.close();
+        Map root = appService.getAppForCodeGeneration(appId);
+        Set<Map> itemSet = (Set<Map>)((Map)root.get("app")).get("items");
+        for (Map itemMap: itemSet) {
+            String name = (String)itemMap.get("name");
+            putContentToPath(zipOutputStream, "/list/"+name+".php", listSlashItemDotPHP(appId, name));
+            putContentToPath(zipOutputStream, "/single/"+name+".php", singleSlashItemDotPHP(appId, name));
+        }
         
         zipOutputStream.finish();
         zipOutputStream.flush();
@@ -98,120 +111,127 @@ public class PHPCodeGenerator {
         IOUtils.closeQuietly(byteArrayOutputStream);
         return byteArrayOutputStream.toByteArray();
     }
-    
-    @RequestMapping(value = "/{appId}/index.php", produces="text/plain")
-    public String indexDotPHP(@PathVariable(value="appId") long appId) {
-        try {
-            //return "<?php echo 'hello'; ?>";
-            /* ------------------------------------------------------------------------ */
-            /* You should do this ONLY ONCE in the whole application life-cycle:        */
-            
-            /* Create and adjust the configuration singleton */
-            
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-            cfg.setDirectoryForTemplateLoading(new File("src/code-templates/php"));
-            cfg.setDefaultEncoding("UTF-8");
-            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-            
-            /* ------------------------------------------------------------------------ */
-            /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
-            
-            /* Create a data-model */
-            Map root = appService.getAppForCodeGeneration(appId);
-            
-            /* Get the template (uses cache internally) */
-            Template temp = cfg.getTemplate("index.php.ftl");
-            
-            /* Merge data-model with template */
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            Writer out = new OutputStreamWriter(baos);
-            temp.process(root, out);
-            // Note: Depending on what `out` is, you may need to call `out.close()`.
-            // This is usually the case for file output, but not for servlet output.
-            return baos.toString();
-        } catch (IOException | TemplateException ex) {
-            Logger.getLogger(PHPCodeGenerator.class.getName()).log(Level.SEVERE, null, ex);
+
+    private void putContentToPath(ZipOutputStream zipOutputStream, String path, String content) throws IOException {
+        zipOutputStream.putNextEntry(new ZipEntry(path));
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(content.getBytes())) {
+            IOUtils.copy(bais, zipOutputStream);
         }
-        return "";
+        zipOutputStream.closeEntry();
+    }
+    
+    @RequestMapping(value = "/{appId}/change-password.php", produces="text/plain")
+    public String changeDashPasswordDotPHP(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("change.dash.password.php.ftl",root);
+    }
+    
+    @RequestMapping(value = "/{appId}/config.php", produces="text/plain")
+    public String configDotPHP(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("config.php.ftl",root);
     }
     
     @RequestMapping(value = "/{appId}/css/style.css", produces="text/css")
     public String cssSlashStyleDotCSS(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("css.slash.style.css.ftl",root);
+    }
+    
+    @RequestMapping(value = "/{appId}/data.sql", produces="text/css")
+    public String dataDotSQL(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("data.sql.ftl",root);
+    }
+    
+    @RequestMapping(value = "/{appId}/index.php", produces="text/plain")
+    public String indexDotPHP(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("index.php.ftl",root);
+    }
+            
+    @RequestMapping(value = "/{appId}/list/{itemName}.php", produces="text/plain")
+    public String listSlashItemDotPHP(@PathVariable(value="appId") long appId,@PathVariable(value="itemName") String itemName) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        selectItem(root, itemName);
+        return templateToString("list.slash.item.php.ftl",root);
+    }
+    
+    @RequestMapping(value = "/{appId}/sa-functions.php", produces="text/plain")
+    public String saDashFunctionsDotPHP() {
+        return templateToString("sa.dash.functions.php.ftl");
+    }
+    
+    @RequestMapping(value = "/{appId}/sa-login-form.php", produces="text/plain")
+    public String saDashLoginDashFormDotPHP() {
+        return templateToString("sa.dash.login.dash.form.php.ftl");
+    }
+    
+    @RequestMapping(value = "/{appId}/sa-login.php", produces="text/plain")
+    public String saDashLoginDotPHP() {
+        return templateToString("sa.dash.login.php.ftl");
+    }
+    
+    @RequestMapping(value = "/{appId}/sa-logout.php", produces="text/plain")
+    public String saDashLogoutDotPHP() {
+        return templateToString("sa.dash.logout.php.ftl");
+    }
+
+    @RequestMapping(value = "/{appId}/settings.php", produces="text/plain")
+    public String settingsDotPHP(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("settings.php.ftl",root);
+    }
+    
+    @RequestMapping(value = "/{appId}/single/{itemName}.php", produces="text/plain")
+    public String singleSlashItemDotPHP(@PathVariable(value="appId") long appId,@PathVariable(value="itemName") String itemName) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        selectItem(root, itemName);
+        return templateToString("single.slash.item.php.ftl",root);
+    }
+    
+    @RequestMapping(value = "/{appId}/user-rights.php", produces="text/plain")
+    public String userDashRightsDotPHP(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("user.dash.rights.php.ftl",root);
+    }
+    
+    @RequestMapping(value = "/{appId}/user.php", produces="text/plain")
+    public String userDotPHP(@PathVariable(value="appId") long appId) {
+        Map root = appService.getAppForCodeGeneration(appId);
+        return templateToString("user.php.ftl",root);
+    }
+    
+    private void selectItem(Map root, String itemName) {
+        Set<Map> itemSet = (Set<Map>)((Map)root.get("app")).get("items");
+        for (Map itemMap: itemSet) {
+            String name = (String)itemMap.get("name");
+            if (name.equals(itemName)) {
+                root.put("item", itemMap);
+                break;
+            }
+        }
+    }
+    
+    private String templateToString(String template, Map model) {
         try {
-            //return "<?php echo 'hello'; ?>";
-            /* ------------------------------------------------------------------------ */
-            /* You should do this ONLY ONCE in the whole application life-cycle:        */
-            
-            /* Create and adjust the configuration singleton */
-            
             Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
             cfg.setDirectoryForTemplateLoading(new File("src/code-templates/php"));
             cfg.setDefaultEncoding("UTF-8");
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+            Template temp = cfg.getTemplate(template);
             
-            /* ------------------------------------------------------------------------ */
-            /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
-            
-            /* Create a data-model */
-            Map root = appService.getAppForCodeGeneration(appId);
-            
-            /* Get the template (uses cache internally) */
-            Template temp = cfg.getTemplate("css.slash.style.css.ftl");
-            
-            /* Merge data-model with template */
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             Writer out = new OutputStreamWriter(baos);
-            temp.process(root, out);
-            // Note: Depending on what `out` is, you may need to call `out.close()`.
-            // This is usually the case for file output, but not for servlet output.
+            temp.process(model, out);
             return baos.toString();
         } catch (IOException | TemplateException ex) {
             Logger.getLogger(PHPCodeGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "";
     }
-            
-    @RequestMapping(value = "/{appId}/{itemId}_list.php", produces="text/plain")
-    public String itemDashListDotPHP(@PathVariable(value="appId") long appId,@PathVariable(value="itemId") long itemId) {
-        try {
-            //return "<?php echo 'hello'; ?>";
-            /* ------------------------------------------------------------------------ */
-            /* You should do this ONLY ONCE in the whole application life-cycle:        */
-            
-            /* Create and adjust the configuration singleton */
-            
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-            cfg.setDirectoryForTemplateLoading(new File("src/code-templates/php"));
-            cfg.setDefaultEncoding("UTF-8");
-            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-            
-            /* ------------------------------------------------------------------------ */
-            /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
-            
-            /* Create a data-model */
-            Map root = appService.getAppForCodeGeneration(appId);
-            Set<Map> itemSet = (Set<Map>)((Map)root.get("app")).get("items");
-            for (Map itemMap: itemSet) {
-                Long noItemId = (Long)itemMap.get("id");
-                if (itemId==noItemId) {
-                    root.put("item", itemMap);
-                    break;
-                }
-            }
-            
-            /* Get the template (uses cache internally) */
-            Template temp = cfg.getTemplate("ITEM_list.php.ftl");
-            
-            /* Merge data-model with template */
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            Writer out = new OutputStreamWriter(baos);
-            temp.process(root, out);
-            // Note: Depending on what `out` is, you may need to call `out.close()`.
-            // This is usually the case for file output, but not for servlet output.
-            return baos.toString();
-        } catch (IOException | TemplateException ex) {
-            Logger.getLogger(PHPCodeGenerator.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "";
+
+    private String templateToString(String template) {
+        return templateToString(template,new HashMap());
     }
 }

@@ -1,7 +1,9 @@
 <?php
+/* index.php */
 $error = "";
-include('login.php');
-include('user_rights_functions.php');
+include('user-rights.php');
+include('sa-functions.php');
+include('sa-login.php');
 $is_logged_in = isset($_SESSION['login_user']);
 ?>
 
@@ -15,30 +17,34 @@ $is_logged_in = isset($_SESSION['login_user']);
  <body>
 
  <h1>
-   ${app.name}
+    ${app.name}
  </h1>
 <?php
 if ($is_logged_in) {
-$loggedInUser = $_SESSION['login_user'];
-?>
-<div id="items">
-Logged as <?php echo $loggedInUser; ?>, <a href="logout.php">Logout</a> | <a href="settings.php">Settings</a>
-<h2>Menu</h2>
-<ul>
+	$loggedInUser = $_SESSION['login_user'];
+	$is_primary = isPrimaryByUsername($loggedInUser);
+	?>
+	<div id="items">
+	Logged as <?php echo $loggedInUser; ?>, <a href="sa-logout.php">Logout</a>
+	<?php if ($is_primary) { ?> | <a href="settings.php">Settings</a> <?php } ?>
+	| <a href="change-password.php">Change Password</a>
+	<h2>Menu</h2>
+	<ul>
 
-<?php
-$var_items = getItemsByRole('admin');
-foreach ($var_items as $item) {
-?>
-<li><a href="<?php echo $item; ?>_list.php"><?php echo getItemLabel($item); ?></a></li>
-<?php
-}
-?>
-</ul>
-</div>
-<?php
+	<?php
+	$rolename = getRoleByUsername($loggedInUser);
+	$var_items = getAllowedItemsByRole($rolename);
+	foreach ($var_items as $item) {
+		?>
+		<li><a href="list/<?php echo $item; ?>.php"><?php echo getItemLabel($item); ?></a></li>
+		<?php
+	}
+	?>
+	</ul>
+	</div>
+	<?php
 } else {
- include('login_form.php');
+	include('sa-login-form.php');
 }
 ?>
 <div id="footer">
