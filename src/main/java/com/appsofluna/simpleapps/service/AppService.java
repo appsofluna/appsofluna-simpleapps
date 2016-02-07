@@ -69,7 +69,7 @@ public class AppService {
             Map itemMap = new HashMap();
             Long itemId = item.getId();
             itemMap.put("label", item.getLabel());
-            itemMap.put("name", item.getName().toLowerCase());
+            itemMap.put("name", clearName(item.getName()));
             itemMap.put("id", itemId);
             Set fieldSet = new HashSet();
             List<Field> fieldList = fieldRepo.findByItem(itemId);
@@ -77,7 +77,7 @@ public class AppService {
                 Map fieldMap = new HashMap();
                 Long fieldId = field.getId();
                 fieldMap.put("label",field.getLabel());
-                fieldMap.put("name",field.getName().toLowerCase());
+                fieldMap.put("name",clearName(field.getName()));
                 fieldMap.put("type",field.getType());
                 fieldMap.put("id",fieldId);
                 fieldMap.put("extra",getFieldExtra(field));
@@ -90,10 +90,13 @@ public class AppService {
         
         Set roleSet = new HashSet();
         List<Role> roleList = roleRepo.findByApp(id);
+        boolean administratorFound = false;
         for (Role role: roleList) {
             Map roleMap = new HashMap();
             Long roleId = role.getId();
-            roleMap.put("name", role.getName());
+            String roleName = role.getName();
+            if (SAConstraints.DEFAULT_ROLENAME.equals(roleName)) administratorFound = true;
+            roleMap.put("name", roleName);
             roleMap.put("id", roleId);
             boolean addAll = role.isAllItemsAllowed();
             List<String> allowedItems = new ArrayList();
@@ -123,10 +126,35 @@ public class AppService {
             roleMap.put("deletable_items", deletableItems);
             roleSet.add(roleMap);
         }
+        if (!administratorFound) {
+            Map roleMap = new HashMap();
+            roleMap.put("name", SAConstraints.DEFAULT_ROLENAME);
+            roleMap.put("id", -1);
+            List<String> allowedItems = new ArrayList();
+            List<String> creatableItems = new ArrayList();
+            List<String> editableItems = new ArrayList();
+            List<String> deletableItems = new ArrayList();
+            for (Item item: itemList) {
+                String name = item.getName().toLowerCase();
+                allowedItems.add(name);
+                creatableItems.add(name);
+                editableItems.add(name);
+                deletableItems.add(name);
+            }
+            roleMap.put("allowed_items", allowedItems);
+            roleMap.put("creatable_items", creatableItems);
+            roleMap.put("editable_items", editableItems);
+            roleMap.put("deletable_items", deletableItems);
+            roleSet.add(roleMap);
+        }
         appMap.put("roles", roleSet);
         
         map.put("app",appMap);
         return map;
+    }
+    
+    private String clearName(String name) {
+        return (name == null) ? "" : name.toLowerCase().replaceAll(" ", "_");
     }
 
     private Map getFieldExtra(Field field) {
@@ -145,17 +173,21 @@ public class AppService {
                 return null;
             }
             Item refItem = itemRepo.findOne(refItemId);
-            map.put("refItem", refItem.getName());
+            map.put("refItem", clearName(refItem.getName()));
+            logger.info("refItem: {}",clearName(refItem.getName()));
             List<String> refFieldList = new ArrayList();
             Object templateObj = formatMap.get(SAConstraints.FIELD_TYPE_ITEM_PARM_TEMPLATE);
             String template = null;
             if (templateObj instanceof String) {
-                template = (String)refItemIdObj;
+                template = (String)templateObj;
+                logger.info("uses field template: {}",template);
             }
             if (template==null || template.trim().equals("")) {
                 template = refItem.getTemplate();
+                logger.info("uses item template: {}",template);
             }
             if (template!=null && !template.trim().equals("")) {
+                logger.info("template works");
                 List<Field> refItemFields = fieldRepo.findByItem(refItemId);
                 Map<String,Field> refItemFieldMap = new HashMap<>();
                 for (Field refField: refItemFields) {
@@ -168,14 +200,15 @@ public class AppService {
                     if (refItemFieldMap.containsKey(fieldName)) {
                         Field refField = refItemFieldMap.get(fieldName);
                         if (SAConstraints.FIELD_TYPE_ITEM.equalsIgnoreCase(refField.getType())) {
-                            refFieldList.add(fieldName.toLowerCase()+"_id");
+                            refFieldList.add(clearName(fieldName)+"_id");
                         } else {
-                            refFieldList.add(fieldName.toLowerCase());
+                            refFieldList.add(clearName(fieldName));
                         }
                     }
                 }
             }
             if (refFieldList.isEmpty()) {
+                logger.info("item template hadn't work");
                 refFieldList.add("id");
             }
             map.put("refFields", refFieldList);

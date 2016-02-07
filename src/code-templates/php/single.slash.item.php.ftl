@@ -66,7 +66,7 @@ function create${titleCase(item.name)}($newRecord) {
 		return false;
 	}
 	<#list item.fields as field>
-	$value_${field.name}_id = $newRecord['${field.name}<#if field.type == 'item'>_id</#if>'];
+	$value_${field.name}<#if field.type == 'item'>_id</#if> = $newRecord['${field.name}<#if field.type == 'item'>_id</#if>'];
 	</#list>
 	global $db_prefix;
 	$conn = getConnection();
@@ -93,7 +93,7 @@ function update${titleCase(item.name)}($updatedRecord) {
 	}
 	$value_id = $updatedRecord['id'];
 	<#list item.fields as field>
-	$value_${field.name}_id = $updatedRecord['${field.name}<#if field.type == 'item'>_id</#if>'];
+	$value_${field.name}<#if field.type == 'item'>_id</#if> = $updatedRecord['${field.name}<#if field.type == 'item'>_id</#if>'];
 	</#list>
 
 	global $db_prefix;
@@ -135,9 +135,6 @@ function delete${titleCase(item.name)}ById($${item.name}_id) {
 
 <#list item.fields as field>
 <#if field.type == 'item'>
-/* GENERATED FOR EACH item.field where type is item [
-
-GENERATED function get{titleCase(field.name)}Labels() { */
 function get${titleCase(field.name)}Labels() {
 	global $db_prefix;
 	$conn = getConnection();
@@ -165,6 +162,7 @@ function get${titleCase(field.name)}Labels() {
 
 </#if>
 </#list>
+?>
 
 <html>
  <head>
@@ -337,8 +335,7 @@ if ($page_edit) {
 								<select id="${field.name}_id" name="${field.name}_id">
 								  <option></option>
 
-								<?php foreach ($${field.name}_label_map as $${field.name}_label_set) { 
-								/?>
+								<?php foreach ($${field.name}_label_map as $${field.name}_label_set) { ?>
 								  <option value="<?php echo $${field.name}_label_set['id']; ?>" <?php
 									if ($${field.name}_label_set['id']==$value_${field.name}_id) echo 'selected="selected"'; ?> ><?php echo $${field.name}_label_set['label']; ?></option>
 								<?php } ?>

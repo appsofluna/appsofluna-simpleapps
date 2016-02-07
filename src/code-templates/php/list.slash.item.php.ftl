@@ -89,8 +89,8 @@ if ($is_logged_in) {
 		<table>
 			<thead>
 				<tr>
-					<#list item.fields as field>]
-					<td>{field.label}</td>
+					<#list item.fields as field>
+					<td>${field.label}</td>
 					</#list>
 					<td><?php if ($is_editable) echo "#"; ?></td>
 				</tr>

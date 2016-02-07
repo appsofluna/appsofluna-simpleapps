@@ -18,6 +18,7 @@ package com.appsofluna.simpleapps.util;
  */
 public class SAConstraints {
     public static final String DEFAULT_USERNAME = "admin";
+    public static final String DEFAULT_ROLENAME = "Administrator";
     public static final String FIELD_TYPE_ITEM = "item";
     public static final String FIELD_TYPE_ITEM_PARM_REFER = "refer";
     public static final String FIELD_TYPE_ITEM_PARM_TEMPLATE = "template";
