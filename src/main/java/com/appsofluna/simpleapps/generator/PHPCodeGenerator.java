@@ -24,10 +24,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -52,7 +52,7 @@ public class PHPCodeGenerator {
     @RequestMapping(value = "/{appId}/files")
     public @ResponseBody Map fileList(@PathVariable(value="appId") long appId) {
         Map map = new HashMap();
-        Set files = new HashSet();
+        List files = new ArrayList();
         map.put("files", files);
         files.add("sa-functions.php");
         files.add("sa-login-form.php");
@@ -65,10 +65,13 @@ public class PHPCodeGenerator {
         files.add("settings.php");
         files.add("user-rights.php");
         files.add("user.php");
+        files.add("css/jquery-ui.css");
         files.add("css/style.css");
+        files.add("js/jquery.js");
+        files.add("js/jquery-ui.js");
         Map root = appService.getAppForCodeGeneration(appId);
-        Set<Map> itemSet = (Set<Map>)((Map)root.get("app")).get("items");
-        for (Map itemMap: itemSet) {
+        List<Map> itemSetList = (List<Map>)((Map)root.get("app")).get("items");
+        for (Map itemMap: itemSetList) {
             String itemName = (String)itemMap.get("name");
             files.add("list/"+itemName+".php");
             files.add("single/"+itemName+".php");
@@ -94,10 +97,13 @@ public class PHPCodeGenerator {
         putContentToPath(zipOutputStream, "user-rights.php", userDashRightsDotPHP(appId));
         putContentToPath(zipOutputStream, "user.php", userDotPHP(appId));
         putContentToPath(zipOutputStream, "/css/style.css", cssSlashStyleDotCSS(appId));
+        putContentToPath(zipOutputStream, "/css/jquery-ui.css", cssSlashJqueryDashUiDotCSS(appId));
+        putContentToPath(zipOutputStream, "/js/jquery.js", jsSlashJqueryDotJS(appId));
+        putContentToPath(zipOutputStream, "/js/jquery-ui.js", jsSlashJqueryDashUiDotJS(appId));
         
         Map root = appService.getAppForCodeGeneration(appId);
-        Set<Map> itemSet = (Set<Map>)((Map)root.get("app")).get("items");
-        for (Map itemMap: itemSet) {
+        List<Map> itemSetList = (List<Map>)((Map)root.get("app")).get("items");
+        for (Map itemMap: itemSetList) {
             String name = (String)itemMap.get("name");
             putContentToPath(zipOutputStream, "/list/"+name+".php", listSlashItemDotPHP(appId, name));
             putContentToPath(zipOutputStream, "/single/"+name+".php", singleSlashItemDotPHP(appId, name));
@@ -120,6 +126,21 @@ public class PHPCodeGenerator {
         zipOutputStream.closeEntry();
     }
     
+    @RequestMapping(value = "/{appId}/css/jquery-ui.css", produces="text/css")
+    public String cssSlashJqueryDashUiDotCSS(@PathVariable(value="appId") long appId) {
+        return templateToString("css.slash.jquery.dash.ui.css.ftl");
+    }
+    
+    @RequestMapping(value = "/{appId}/js/jquery.js", produces="text/js")
+    public String jsSlashJqueryDotJS(@PathVariable(value="appId") long appId) {
+        return templateToString("js.slash.jquery.js.ftl");
+    }
+    
+    @RequestMapping(value = "/{appId}/js/jquery-ui.js", produces="text/js")
+    public String jsSlashJqueryDashUiDotJS(@PathVariable(value="appId") long appId) {
+        return templateToString("js.slash.jquery.dash.ui.js.ftl");
+    }
+    
     @RequestMapping(value = "/{appId}/change-password.php", produces="text/plain")
     public String changeDashPasswordDotPHP(@PathVariable(value="appId") long appId) {
         Map root = appService.getAppForCodeGeneration(appId);
@@ -134,8 +155,7 @@ public class PHPCodeGenerator {
     
     @RequestMapping(value = "/{appId}/css/style.css", produces="text/css")
     public String cssSlashStyleDotCSS(@PathVariable(value="appId") long appId) {
-        Map root = appService.getAppForCodeGeneration(appId);
-        return templateToString("css.slash.style.css.ftl",root);
+        return templateToString("css.slash.style.css.ftl");
     }
     
     @RequestMapping(value = "/{appId}/data.sql", produces="text/css")
@@ -203,8 +223,8 @@ public class PHPCodeGenerator {
     }
     
     private void selectItem(Map root, String itemName) {
-        Set<Map> itemSet = (Set<Map>)((Map)root.get("app")).get("items");
-        for (Map itemMap: itemSet) {
+        List<Map> itemSetList = (List<Map>)((Map)root.get("app")).get("items");
+        for (Map itemMap: itemSetList) {
             String name = (String)itemMap.get("name");
             if (name.equals(itemName)) {
                 root.put("item", itemMap);

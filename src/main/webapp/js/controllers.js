@@ -204,9 +204,9 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     fnAppUserCB.func = function (appUser,appId,userId) {
                         if (appUser) {
                             console.log(appUser.id);
-                            $scope.userForm.app_role_map[appId].original = appUser.role.id;
-                            $scope.userForm.app_role_map[appId].select = appUser.role.id;
-                            $scope.userForm.app_role_map[appId].changed = false;
+                            $scope.userForm.data.app_role_map[appId].original = appUser.role.id;
+                            $scope.userForm.data.app_role_map[appId].select = appUser.role.id;
+                            $scope.userForm.data.app_role_map[appId].changed = false;
                         };
                     };
                     SAUsers.getAppUser(fnAppUserCB.app_id,fnAppUserCB.user_id, fnAppUserCB);
@@ -216,11 +216,11 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     SAApps.query(function (recs) {
                         $scope.userForm.data.sa_apps = recs;
                         for (var sa_app_index in $scope.userForm.data.sa_apps) {
-                            var sa_app = $scope.sa_apps[sa_app_index];
+                            var sa_app = $scope.userForm.data.sa_apps[sa_app_index];
                             var cbObject = {};
                             cbObject.app_id = sa_app.id;
                             cbObject.func = function(sa_app_roles) {
-                                $scope.roles_by_app_map[this.app_id]= sa_app_roles;
+                                $scope.userForm.data.roles_by_app_map[this.app_id]= sa_app_roles;
                             };
                             SARoles.findByApp(sa_app.id,cbObject);
 
@@ -228,7 +228,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                             selection.select = null;
                             selection.original = null;
                             selection.changed = false;
-                            $scope.app_role_map[sa_app.id] = selection;
+                            $scope.userForm.data.app_role_map[sa_app.id] = selection;
                             $scope.userForm.internal.fnRefreshRole(sa_app.id,$stateParams.userId);
                         };
                     });
@@ -297,8 +297,8 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                 // Open the change password dialog
                 dialog.fnShow = function () {
                     this.data = {};
-                    this.data.username = $scope.sa_user.username;
-                    this.data.userId = $scope.sa_user.id;
+                    this.data.username = $scope.userForm.data.sa_user.username;
+                    this.data.userId = $scope.userForm.data.sa_user.id;
                     this.data.message = '';
                     this.modal.show();
                 };
@@ -334,12 +334,12 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                 popup.fnShow = function () {
                     this.modal = $ionicPopup.confirm({
                         title: 'Delete User',
-                        template: 'Are you sure you want to delete the user: ' + $scope.sa_user.username + '?'
+                        template: 'Are you sure you want to delete the user: ' + $scope.userForm.data.sa_user.username + '?'
                     });
                     this.modal.then(function (res) {
                         if (res) {
                             console.log('You are sure');
-                            SAUsers.removeUser($scope.sa_user.id, function (data) {
+                            SAUsers.removeUser($scope.userForm.data.sa_user.id, function (data) {
                                 $state.transitionTo('app.settings',{},{ reload: true });
                             });
                         } else {
@@ -369,11 +369,21 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     SAItems.byUrl(rec._links.app.href, function (app) {
                         SAUsers.getAppUser(app.id,$rootScope.user_id,function(data,app_id,user_id) {
                             $scope.current_userinfo.appuser = data;
+                            $scope.current_userinfo.active_app_id = app.id;
                             if (data) {
                                 $scope.current_userinfo.assigned = true;
-                                SAPermissions.findByRoleAndItem($scope.current_userinfo.appuser.role.id,$stateParams.itemId, function(res) {
-                                    $scope.current_userinfo.permission = res;
-                                });
+                                if($scope.current_userinfo.appuser.role.allItemsAllowed) {
+                                    $scope.current_userinfo.permission = {
+                                        accessAllowed: true,
+                                        createAllowed: true,
+                                        editAllowed: true,
+                                        deleteAllowed: true
+                                    };
+                                } else {
+                                    SAPermissions.findByRoleAndItem($scope.current_userinfo.appuser.role.id,$stateParams.itemId, function(res) {
+                                        $scope.current_userinfo.permission = res;
+                                    });
+                                }
                             }
                         });
 
@@ -1118,14 +1128,18 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                             var sa_app_item = recs[sa_app_item_index];
                             //get permission
                             if ($scope.current_userinfo.appuser) {
-                                var callback = {};
-                                callback.item = sa_app_item;
-                                callback.func = function(res) {
-                                    if(res && res.accessAllowed) {
-                                        $scope.allowed_sa_app_items[this.item.id] = this.item;
-                                    }
-                                };
-                                SAPermissions.findByRoleAndItem($scope.current_userinfo.appuser.role.id,sa_app_item.id, callback);
+                                if ($scope.current_userinfo.appuser.role.allItemsAllowed) {
+                                    $scope.allowed_sa_app_items[sa_app_item.id] = sa_app_item;
+                                } else {
+                                    var callback = {};
+                                    callback.item = sa_app_item;
+                                    callback.func = function(res) {
+                                        if(res && res.accessAllowed) {
+                                            $scope.allowed_sa_app_items[this.item.id] = this.item;
+                                        }
+                                    };
+                                    SAPermissions.findByRoleAndItem($scope.current_userinfo.appuser.role.id,sa_app_item.id, callback);
+                                }
                             }
                         }
                     });

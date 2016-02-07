@@ -12,6 +12,7 @@ $is_logged_in = isset($_SESSION['login_user']);
   <title>
 	${app.name} - Settings
   </title>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
  </head>
  <body>
 <h1>

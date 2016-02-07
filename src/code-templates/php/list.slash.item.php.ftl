@@ -21,7 +21,7 @@ function getAll${titleCase(item.name)}Records() {
 		return null;
 	}
 
-	$sql = "SELECT id<#list item.fields as field>, ${field.name}<#if field.type == 'item'>_id</#if></#list> FROM ".$db_prefix."${item.name}";
+	$sql = "SELECT id<#list item.fields as field>, ${field.name}<#if field.type == 'period'>_from, ${field.name}_to</#if><#if field.type == 'item'>_id</#if></#list> FROM ".$db_prefix."${item.name}";
 	$result = mysqli_query($conn, $sql);
 
 	$all_${item.name}_records = array();
@@ -59,6 +59,7 @@ function getAll${titleCase(item.name)}Records() {
   <title>
 	${app.name} - ${item.label} Records
   </title>
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
  </head>
  <body>
 <h1>
@@ -102,7 +103,9 @@ if ($is_logged_in) {
 				?>
 				<tr>
 					<#list item.fields as field>
-					  <td><?php echo $record["${field.name}<#if field.type == 'item'>_label</#if>"]; ?></td>
+					  <td><?php echo $record["${field.name}<#if field.type == 'period'>_from"];
+                                                    echo ' - ';
+                                                    echo $record["${field.name}_to</#if><#if field.type == 'item'>_label</#if>"]; ?></td>
 					</#list>
 				  <td>
 					<?php if ($is_editable) { ?> <a href="../single/${item.name}.php?page=edit&id=<?php echo $record['id']; ?>">edit</a>

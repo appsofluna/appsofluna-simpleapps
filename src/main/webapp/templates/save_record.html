@@ -26,7 +26,7 @@ THE SOFTWARE.
           <span class="input-label">{{sa_field.label}}</span>
           <div ng-switch="sa_field.type">
               <span ng-switch-when="range">
-                  <input class="textbox-n" type="range" min="{{saveRecordDialog.data.fieldFormats[sa_field.id]['min']}}" max="{{saveRecordDialog.data.fieldFormats[sa_field.id]['max']}}" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" />
+                  <input required="true" class="textbox-n" type="range" min="{{saveRecordDialog.data.fieldFormats[sa_field.id]['min']}}" max="{{saveRecordDialog.data.fieldFormats[sa_field.id]['max']}}" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" />
               </span>
               <span ng-switch-when="period">
                   <div>
@@ -45,7 +45,7 @@ THE SOFTWARE.
                     items="selection_values[sa_field.id]"
                     value="saveRecordDialog.data.selectionArrays[sa_field.id]"
                     text-property="name"
-                    allow-empty='true'
+                    allow-empty='false'
                     multi-select="saveRecordDialog.data.mulitAllowed[sa_field.id]"
                     modal-template-url="lib/ionic-fancy-select/templates/modal-template.html"
                     template-url="lib/ionic-fancy-select/templates/item-template.html"
@@ -54,13 +54,13 @@ THE SOFTWARE.
                   </fancy-select>
               </span>
               <span ng-switch-when="item">
-                  <select ng-init="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content = saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">
+                  <select required="true" ng-init="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content = saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" ng-options="reference_value.id as (reference_value.label) for reference_value in reference_values[sa_field.id]">
                     <option></option>
                   </select>
               </span>
               <span ng-switch-default>
                   <!-- for text,number,date -->
-                  <input class="textbox-n" type="{{sa_field.type}}" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" />
+                  <input class="textbox-n"  required="true"  type="{{sa_field.type}}" ng-model="saveRecordDialog.data.recordData.fieldValues[sa_field.id].content" />
               </span>
           </div>
           

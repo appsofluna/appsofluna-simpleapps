@@ -21,7 +21,7 @@ function get${titleCase(item.name)}RecordById($${item.name}_id) {
 		return null;
 	}
 	
-	$sql = "SELECT id<#if (item.fields?size>0) >,</#if><#list item.fields as field>${field.name}<#if field.type == 'item'>_id</#if><#sep>,</#list> FROM ".$db_prefix."${item.name} WHERE id = $${item.name}_id";
+	$sql = "SELECT id<#if (item.fields?size>0) >,</#if><#list item.fields as field>${field.name}<#if field.type == 'period'>_from, ${field.name}_to</#if><#if field.type == 'item'>_id</#if><#sep>,</#list> FROM ".$db_prefix."${item.name} WHERE id = $${item.name}_id";
 	$result = mysqli_query($conn, $sql);
 
 	$${item.name}_record = null;
@@ -60,13 +60,15 @@ function get${titleCase(item.name)}RecordById($${item.name}_id) {
 function create${titleCase(item.name)}($newRecord) {
 	if (!$newRecord
 		<#list item.fields as field>
-		|| !isset($newRecord['${field.name}<#if field.type == 'item'>_id</#if>'])
+		|| !isset($newRecord['${field.name}<#if field.type == 'period'>_from'])
+                || !isset($newRecord['${field.name}_to</#if><#if field.type == 'item'>_id</#if>'])
 		</#list>
 		) {
 		return false;
 	}
 	<#list item.fields as field>
-	$value_${field.name}<#if field.type == 'item'>_id</#if> = $newRecord['${field.name}<#if field.type == 'item'>_id</#if>'];
+	$value_${field.name}<#if field.type == 'period'>_from = $newRecord['${field.name}_from'];
+        $value_${field.name}_to </#if><#if field.type == 'item'>_id</#if> = $newRecord['${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>'];
 	</#list>
 	global $db_prefix;
 	$conn = getConnection();
@@ -74,7 +76,7 @@ function create${titleCase(item.name)}($newRecord) {
 		return false;
 	}
 
-	$sql = "INSERT INTO ".$db_prefix."${item.name} (<#list item.fields as field>${field.name}<#if field.type == 'item'>_id</#if><#sep>,</#list>) VALUES (<#list item.fields as field>'$value_${field.name}<#if field.type == 'item'>_id</#if>'<#sep>,</#list>)";
+	$sql = "INSERT INTO ".$db_prefix."${item.name} (<#list item.fields as field>${field.name}<#if field.type == 'period'>_from, ${field.name}_to</#if><#if field.type == 'item'>_id</#if><#sep>,</#list>) VALUES (<#list item.fields as field>'$value_${field.name}<#if field.type == 'period'>_from', '$value_${field.name}_to</#if><#if field.type == 'item'>_id</#if>'<#sep>,</#list>)";
 	$done = false;
 	if (mysqli_query($conn, $sql)) {
 		$done = true;
@@ -86,14 +88,16 @@ function create${titleCase(item.name)}($newRecord) {
 function update${titleCase(item.name)}($updatedRecord) {
 	if (!$updatedRecord || !isset($updatedRecord['id'])
 		<#list item.fields as field>
-		|| !isset($updatedRecord['${field.name}<#if field.type == 'item'>_id</#if>'])
+		|| !isset($updatedRecord['${field.name}<#if field.type == 'period'>_from'])
+                || !isset($updatedRecord['${field.name}_to</#if><#if field.type == 'item'>_id</#if>'])
 		</#list>
 		) {
 		return false;
 	}
 	$value_id = $updatedRecord['id'];
 	<#list item.fields as field>
-	$value_${field.name}<#if field.type == 'item'>_id</#if> = $updatedRecord['${field.name}<#if field.type == 'item'>_id</#if>'];
+	$value_${field.name}<#if field.type == 'period'>_from = $updatedRecord['${field.name}_from'];
+        $value_${field.name}_to</#if><#if field.type == 'item'>_id</#if> = $updatedRecord['${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>'];
 	</#list>
 
 	global $db_prefix;
@@ -102,7 +106,7 @@ function update${titleCase(item.name)}($updatedRecord) {
 		return false;
 	}
 
-	$sql = "UPDATE ".$db_prefix."${item.name} SET <#list item.fields as field>${field.name}<#if field.type == 'item'>_id</#if> = '$value_${field.name}<#if field.type == 'item'>_id</#if>'<#sep>,</#list> WHERE id=$value_id";
+	$sql = "UPDATE ".$db_prefix."${item.name} SET <#list item.fields as field>${field.name}<#if field.type == 'period'>_from = '$value_${field.name}_from',${field.name}_to</#if><#if field.type == 'item'>_id</#if> = '$value_${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>'<#sep>,</#list> WHERE id=$value_id";
 
 	$done = false;
 	if (mysqli_query($conn, $sql)) {
@@ -145,7 +149,7 @@ function get${titleCase(field.name)}Labels() {
 	$sql = "SELECT id, <#list field.extra.refFields as refField>${refField}<#sep>,</#list> FROM ".$db_prefix."${field.extra.refItem}";
 	$result = mysqli_query($conn, $sql);
 
-	$${field.name}student_record_map = array();
+	$${field.name}_record_map = array();
 	if ($result && mysqli_num_rows($result) > 0) {
 		while($row = mysqli_fetch_assoc($result)) {
 			$${field.name}_record_set = array();
@@ -167,6 +171,34 @@ function get${titleCase(field.name)}Labels() {
 <html>
  <head>
   <title>${app.name} - ${titleCase(item.label)}</title>
+  <link rel="stylesheet" href="../css/jquery-ui.css">
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
+  <script src="../js/jquery.js"></script>
+  <script src="../js/jquery-ui.js"></script>
+  <script>
+    $(function() {
+        <#list item.fields as field>
+        <#if field.type == 'period'>
+        $( "#${field.name}_from" ).datepicker({
+          dateFormat: "yy-mm-dd",
+          defaultDate: "+1w",
+          changeMonth: true,
+          onClose: function( selectedDate ) {
+            $( "#${field.name}_to" ).datepicker( "option", "minDate", selectedDate );
+          }
+        });
+        $( "#${field.name}_to" ).datepicker({
+          dateFormat: "yy-mm-dd",
+          defaultDate: "+1w",
+          changeMonth: true,
+          onClose: function( selectedDate ) {
+            $( "#${field.name}_from" ).datepicker( "option", "maxDate", selectedDate );
+          }
+        </#if>
+        </#list>
+        });
+  });
+  </script>
  </head>
  <body>
 <h1>${app.name} - ${titleCase(item.label)}</h1>
@@ -219,21 +251,24 @@ if ($is_logged_in) {
 				if ($page_edit && 'editRecord'==$_POST['action']) {
 					if (!$is_editable) {
 						$formMessage = "Unauthorized action - Edit";
-					} else if (<#list item.fields as field>empty($_POST['${field.name}<#if field.type == 'item'>_id</#if>'])<#sep> ||</#list>) {
+					} else if (<#list item.fields as field>empty($_POST['${field.name}<#if field.type == 'period'>_from']) || empty($_POST['${field.name}_to</#if><#if field.type == 'item'>_id</#if>'])<#sep> ||</#list>) {
 						$formMessage = "Invalid values.";
 					} else {
 						<#list item.fields as field>
-						$value_${field.name}<#if field.type == 'item'>_id</#if>=$_POST['${field.name}<#if field.type == 'item'>_id</#if>'];
+						$value_${field.name}<#if field.type == 'period'>_from=$_POST['${field.name}_from'];
+                                                $value_${field.name}_to</#if><#if field.type == 'item'>_id</#if>=$_POST['${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>'];
 						</#list>
 						
 						<#list item.fields as field>
-						$value_${field.name}<#if field.type == 'item'>_id</#if> = stripslashes($value_${field.name}<#if field.type == 'item'>_id</#if>);
+						$value_${field.name}<#if field.type == 'period'>_from=stripslashes($value_${field.name}_from);
+                                                $value_${field.name}_to</#if><#if field.type == 'item'>_id</#if> = stripslashes($value_${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>);
 						</#list>
 
 						$updatedRecord = array();
 						$updatedRecord['id'] = $record_id;
                                                 <#list item.fields as field>
-						$updatedRecord['${field.name}<#if field.type == 'item'>_id</#if>'] = $value_${field.name}<#if field.type == 'item'>_id</#if>;
+						$updatedRecord['${field.name}<#if field.type == 'period'>_from'] = $value_${field.name}_from;
+                                                $updatedRecord['${field.name}_to</#if><#if field.type == 'item'>_id</#if>'] = $value_${field.name}<#if field.type='period'>_to</#if><#if field.type == 'item'>_id</#if>;
                                                 </#list>
 
 						if (update${titleCase(item.name)}($updatedRecord)) {
@@ -258,17 +293,20 @@ if ($is_logged_in) {
 					if (!$is_creatable) {
 						$formMessage = "Unauthorized action - Create";
 					} else if (
-						<#list item.fields as field>empty($_POST['${field.name}<#if field.type == 'item'>_id</#if>'])<#sep> ||</#list>
+						<#list item.fields as field>empty($_POST['${field.name}<#if field.type == 'period'>_from']) || empty($_POST['${field.name}_to</#if><#if field.type == 'item'>_id</#if>'])<#sep> ||</#list>
 						) {
 						$formMessage = "Invalid values.";
 					} else {
-						<#list item.fields as field>$value_${field.name}<#if field.type == 'item'>_id</#if>=$_POST['${field.name}<#if field.type == 'item'>_id</#if>'];</#list>
+						<#list item.fields as field>$value_${field.name}<#if field.type == 'period'>_from=$_POST['${field.name}_from'];
+                                                $value_${field.name}_to</#if><#if field.type == 'item'>_id</#if>=$_POST['${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>'];</#list>
 						
-						<#list item.fields as field>$value_${field.name}<#if field.type == 'item'>_id</#if> = stripslashes($value_${field.name}<#if field.type == 'item'>_id</#if>);</#list>
+						<#list item.fields as field>$value_${field.name}<#if field.type == 'period'>_from = stripslashes($value_${field.name}_from);
+                                                $value_${field.name}_to</#if><#if field.type == 'item'>_id</#if> = stripslashes($value_${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>);</#list>
 
 						$newRecord = array();
 
-						<#list item.fields as field>$newRecord['${field.name}<#if field.type == 'item'>_id</#if>'] = $value_${field.name}<#if field.type == 'item'>_id</#if>;</#list>
+						<#list item.fields as field>$newRecord['${field.name}<#if field.type == 'period'>_from'] = $value_${field.name}_from;
+                                                $newRecord['${field.name}_to</#if><#if field.type == 'item'>_id</#if>'] = $value_${field.name}<#if field.type == 'period'>_to</#if><#if field.type == 'item'>_id</#if>;</#list>
 
 						if (create${titleCase(item.name)}($newRecord)) {
 							$formMessage = "The ${item.label} has been created.";
@@ -280,10 +318,9 @@ if ($is_logged_in) {
 				}
 			} else if ($page_create) {
 				$record = array();
-				/* GENERATED FOR EACH item.field
-					$record['{field.name (if ref add('_id')}'] = ''; */
 
-				<#list item.fields as field>$record['${field.name}<#if field.type == 'item'>_id</#if>'] = '';</#list>
+				<#list item.fields as field>$record['${field.name}<#if field.type == 'period'>_from'] = '';
+                                $record['${field.name}_to</#if><#if field.type == 'item'>_id</#if>'] = '';</#list>
 			}
 			?>
 
@@ -354,9 +391,18 @@ if ($page_edit) {
 						<td>
 							<?php
 								if ($page_edit || $page_create) { ?>
+                                                                <#if field.type == 'period'>
+                                                                From: <input id="${field.name}_from" type="text" name="${field.name}_from" value="<?php echo $record['${field.name}_from']; ?>" />
+                                                                To: <input id="${field.name}_to" type="text" name="${field.name}_to" value="<?php echo $record['${field.name}_to']; ?>" />
+                                                                <#else>
 								<input id="${field.name}" type="${field.type}" name="${field.name}" value="<?php echo $record['${field.name}']; ?>" />
+                                                                </#if>
 							<?php } else {
+                                                                <#if field.type == 'period'>
+								echo $record['${field.name}_from'].' - '.$record['${field.name}_to'];
+                                                                <#else>
 								echo $record['${field.name}'];
+                                                                </#if>
 							} ?>
 						</td>
 					</tr>

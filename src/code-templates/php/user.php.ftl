@@ -12,6 +12,7 @@ $is_logged_in = isset($_SESSION['login_user']);
   <title>
 	${app.name} - User
   </title>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
  </head>
  <body>
 <h1>
@@ -65,7 +66,9 @@ if ($is_logged_in) {
 						$primary=$_POST['primary'];
 						$rolename = stripslashes($rolename);
 						$primary = stripslashes($primary);
-						if (updateUser($user_id,$rolename,$primary)) {
+                                                if ($primary=="no" && $user['username']==$loggedInUser) {
+                                                    $formMessage = "Unable to update. The active user has to be a primary user.";
+                                                } else if (updateUser($user_id,$rolename,$primary)) {
 							$user = getUserById($user_id);
 							$formMessage = "The user has been updated.";
 						} else {

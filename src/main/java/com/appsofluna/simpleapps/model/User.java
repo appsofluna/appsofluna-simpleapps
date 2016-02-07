@@ -13,8 +13,12 @@
 package com.appsofluna.simpleapps.model;
 
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -36,6 +40,9 @@ public class User extends AbstractEntity implements Serializable {
     
     @Column(name = "type")
     private String type;
+    
+    @OneToMany(mappedBy = "user", orphanRemoval = true,cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
+    private List<AppUser> appUserList; //used only to casecade removal
 
     public String getUsername() {
         return username;

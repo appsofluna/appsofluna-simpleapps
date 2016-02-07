@@ -13,10 +13,14 @@
 package com.appsofluna.simpleapps.model;
 
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -37,6 +41,12 @@ public class Role extends AbstractEntity implements Serializable {
     
     @Column(name = "is_all_items_allowed")
     private boolean allItemsAllowed;
+    
+    @OneToMany(mappedBy = "role", orphanRemoval = true,cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
+    private List<Permission> permissionList; //used only to casecade removal
+    
+    @OneToMany(mappedBy = "role", orphanRemoval = true,cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
+    private List<AppUser> appUserList; //used only to casecade removal
 
     public App getApp() {
         return app;

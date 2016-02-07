@@ -19,7 +19,7 @@ INSERT INTO ${app.name?lower_case?replace(" ","_")}.${app.name?lower_case?replac
 CREATE TABLE ${app.name?lower_case?replace(" ","_")}.${app.name?lower_case?replace(" ","_")}_${item.name}
 (id int NOT NULL AUTO_INCREMENT,
 <#list item.fields as field>
-`${field.name}<#if field.type == 'item'>_id</#if>` <#if field.type == 'text'>varchar(255)</#if><#if field.type == 'number'>int</#if><#if field.type == 'range'>int</#if><#if field.type == 'date'>DATE</#if><#if field.type == 'period'>varchar(255)</#if><#if field.type == 'selection'>varchar(255)</#if><#if field.type == 'item'>int</#if> NOT NULL,
+`${field.name}<#if field.type == 'period'>_from</#if><#if field.type == 'item'>_id</#if>` <#if field.type == 'text'>varchar(255)</#if><#if field.type == 'number'>int</#if><#if field.type == 'range'>int</#if><#if field.type == 'date'>DATE</#if><#if field.type == 'period'> DATE NOT NULL, `${field.name}_to` DATE</#if><#if field.type == 'selection'>varchar(255)</#if><#if field.type == 'item'>int</#if> NOT NULL,
 </#list>
 CONSTRAINT pk_${app.name?lower_case?replace(" ","_")}_${item.name}_id PRIMARY KEY(id)
 );

@@ -36,7 +36,7 @@ THE SOFTWARE.
       <div class="item">
         <ion-list>
           <ion-item ng-repeat="sa_field in sa_item_fields">
-            {{sa_field.name}}
+            {{sa_field.label}}
             <i class="icon ion-close-round" ng-click="showConfirmDeleteFiled(sa_field)"></i>
             <i class="icon ion-edit" ng-click="saveFieldDialog.fnShowEdit(sa_field)"></i>
           </ion-item>

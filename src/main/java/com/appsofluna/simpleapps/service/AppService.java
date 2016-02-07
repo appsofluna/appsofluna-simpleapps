@@ -26,10 +26,8 @@ import com.appsofluna.simpleapps.util.JsonUtil;
 import com.appsofluna.simpleapps.util.SAConstraints;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -63,7 +61,7 @@ public class AppService {
         appMap.put("name", app.getName());
         appMap.put("id", app.getId());
         
-        Set itemsSet = new HashSet();
+        List itemsSetList = new ArrayList();
         List<Item> itemList = itemRepo.findByApp(id);
         for (Item item: itemList) {
             Map itemMap = new HashMap();
@@ -71,7 +69,7 @@ public class AppService {
             itemMap.put("label", item.getLabel());
             itemMap.put("name", clearName(item.getName()));
             itemMap.put("id", itemId);
-            Set fieldSet = new HashSet();
+            List fieldSetList = new ArrayList();
             List<Field> fieldList = fieldRepo.findByItem(itemId);
             for (Field field: fieldList) {
                 Map fieldMap = new HashMap();
@@ -81,14 +79,14 @@ public class AppService {
                 fieldMap.put("type",field.getType());
                 fieldMap.put("id",fieldId);
                 fieldMap.put("extra",getFieldExtra(field));
-                fieldSet.add(fieldMap);
+                fieldSetList.add(fieldMap);
             }
-            itemMap.put("fields",fieldSet);
-            itemsSet.add(itemMap);
+            itemMap.put("fields",fieldSetList);
+            itemsSetList.add(itemMap);
         }
-        appMap.put("items", itemsSet);
+        appMap.put("items", itemsSetList);
         
-        Set roleSet = new HashSet();
+        List roleSetList = new ArrayList();
         List<Role> roleList = roleRepo.findByApp(id);
         boolean administratorFound = false;
         for (Role role: roleList) {
@@ -124,7 +122,7 @@ public class AppService {
             roleMap.put("creatable_items", creatableItems);
             roleMap.put("editable_items", editableItems);
             roleMap.put("deletable_items", deletableItems);
-            roleSet.add(roleMap);
+            roleSetList.add(roleMap);
         }
         if (!administratorFound) {
             Map roleMap = new HashMap();
@@ -145,9 +143,9 @@ public class AppService {
             roleMap.put("creatable_items", creatableItems);
             roleMap.put("editable_items", editableItems);
             roleMap.put("deletable_items", deletableItems);
-            roleSet.add(roleMap);
+            roleSetList.add(roleMap);
         }
-        appMap.put("roles", roleSet);
+        appMap.put("roles", roleSetList);
         
         map.put("app",appMap);
         return map;
