@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 AppsoFluna.
+ * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -10,6 +10,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.appsofluna.simpleapps.service;
 
 import com.appsofluna.simpleapps.model.App;
@@ -157,9 +158,56 @@ public class AppService {
 
     private Map getFieldExtra(Field field) {
         Map map = new HashMap();
-        if (SAConstraints.FIELD_TYPE_ITEM.equals(field.getType())) {
-            String format = field.getFormat();
-            Map<String, Object> formatMap = JsonUtil.stringToMap(format);
+        String fieldType = field.getType();
+        String format = field.getFormat();
+        Map<String, Object> formatMap = null;
+        if (format!=null && !format.trim().isEmpty()) {
+            formatMap = JsonUtil.stringToMap(format);
+        }
+        if (SAConstraints.FIELD_TYPE_RANGE.equals(fieldType)) {
+            Object rangeMinParmObj = formatMap.get(SAConstraints.FIELD_TYPE_RANGE_PARM_MIN);
+            Integer rangeMinParm;
+            if (rangeMinParmObj instanceof Integer) {
+                rangeMinParm = (Integer) rangeMinParmObj;
+            } else if (rangeMinParmObj instanceof String) {
+                rangeMinParm = Integer.parseInt((String)rangeMinParmObj);
+            } else {
+                logger.error("unable to format range min parm");
+                return null;
+            }
+            map.put("min", rangeMinParm);
+            Object rangeMaxParmObj = formatMap.get(SAConstraints.FIELD_TYPE_RANGE_PARM_MAX);
+            Integer rangeMaxParm;
+            if (rangeMaxParmObj instanceof Integer) {
+                rangeMaxParm = (Integer) rangeMaxParmObj;
+            } else if (rangeMinParmObj instanceof String) {
+                rangeMaxParm = Integer.parseInt((String)rangeMaxParmObj);
+            } else {
+                logger.error("unable to format range max parm");
+                return null;
+            }
+            map.put("max", rangeMaxParm);
+        } if (SAConstraints.FIELD_TYPE_SELECTION.equals(fieldType)) {
+            Object selectionOptionsParmObj = formatMap.get(SAConstraints.FIELD_TYPE_SELECTION_PARM_OPTIONS);
+            String selectionOptionsParm = "";
+            if (selectionOptionsParmObj instanceof String) {
+                selectionOptionsParm = ((String)selectionOptionsParmObj).trim();
+            }
+            List<String> options = new ArrayList();
+            if (!selectionOptionsParm.isEmpty()) {
+                String[] selectionOptions = selectionOptionsParm.split(",");
+                for (String option: selectionOptions) {
+                    options.add(option.trim());
+                }
+            }
+            map.put("options", options);
+            Object selectionMultipleParmObj = formatMap.get(SAConstraints.FIELD_TYPE_SELECTION_PARM_MULTIPLE);
+            String selectionMultipleParm = null;
+            if (selectionMultipleParmObj instanceof String) {
+                selectionMultipleParm = (String)selectionMultipleParmObj;
+            }
+            map.put("multiple", "true".equals(selectionMultipleParm) ? "true" : "false");
+        } else if (SAConstraints.FIELD_TYPE_ITEM.equals(field.getType())) {
             Object refItemIdObj = formatMap.get(SAConstraints.FIELD_TYPE_ITEM_PARM_REFER);
             Long refItemId;
             if (refItemIdObj instanceof Long) {

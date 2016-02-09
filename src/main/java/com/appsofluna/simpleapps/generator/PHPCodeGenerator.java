@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 AppsoFluna.
+ * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -10,6 +10,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.appsofluna.simpleapps.generator;
 
 import com.appsofluna.simpleapps.service.AppService;
@@ -17,6 +18,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import org.apache.commons.io.FileUtils;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,11 +30,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,37 +48,120 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/generate/php")
 public class PHPCodeGenerator {
+    private static final Logger logger = LoggerFactory.getLogger(PHPCodeGenerator.class);
+    private static final String TEMPLATE_PATH = "/php-templates";
+    private static final String FILE_NAME_CONFIG_DOT_PHP = "config.php";
+    private static final String FILE_NAME_DATA_DOT_SQL = "data.sql";
+    private static final String FOLDER_PREFIX_LIST = "list/";
+    private static final String FOLDER_PREFIX_SINGLE = "single/";
+    private static final String FOLDER_NAME_COMMON = "common";
+    private static final String PHP_FILE_SUFFIX = ".php";
+    private static final String[] VISIBLE_FILE_TYPES = {".php",".js",".css",".sql"};
+    
     @Autowired
     private AppService appService;
     
     @RequestMapping(value = "/{appId}/files")
     public @ResponseBody Map fileList(@PathVariable(value="appId") long appId) {
         Map map = new HashMap();
-        List files = new ArrayList();
-        map.put("files", files);
-        files.add("sa-functions.php");
-        files.add("sa-login-form.php");
-        files.add("sa-login.php");
-        files.add("sa-logout.php");
-        files.add("change-password.php");
-        files.add("config.php");
-        files.add("data.sql");
-        files.add("index.php");
-        files.add("settings.php");
-        files.add("user-rights.php");
-        files.add("user.php");
-        files.add("css/jquery-ui.css");
-        files.add("css/style.css");
-        files.add("js/jquery.js");
-        files.add("js/jquery-ui.js");
+        List<String> files = new ArrayList();
+        String commonFile = this.getClass().getResource(TEMPLATE_PATH+"/"+FOLDER_NAME_COMMON).getFile();
+        File commonFolder = new File(commonFile);
+        listFilesForFolder(commonFolder,"",files);
+        files.add(FILE_NAME_CONFIG_DOT_PHP);
+        files.add(FILE_NAME_DATA_DOT_SQL);
         Map root = appService.getAppForCodeGeneration(appId);
         List<Map> itemSetList = (List<Map>)((Map)root.get("app")).get("items");
         for (Map itemMap: itemSetList) {
             String itemName = (String)itemMap.get("name");
-            files.add("list/"+itemName+".php");
-            files.add("single/"+itemName+".php");
+            files.add(FOLDER_PREFIX_LIST+itemName+PHP_FILE_SUFFIX);
+            files.add(FOLDER_PREFIX_SINGLE+itemName+PHP_FILE_SUFFIX);
         }
+        List filteredFiles = new ArrayList();
+        for (String file: files) {
+            for (String type : VISIBLE_FILE_TYPES) {
+                if (file.toLowerCase().endsWith(type))
+                    filteredFiles.add(file);
+            }
+        }
+        map.put("files", filteredFiles);
         return map;
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{folderName}/{filePath}.php",produces = "text/plain")
+    public String processSecondaryFolderPHP(@PathVariable(value="appId") long appId,@PathVariable(value="folderName") String folderName,@PathVariable(value="filePath") String filePath) {
+        return processSecondaryFolder(appId, folderName, filePath, "php");
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{folderName}/{filePath}.sql",produces = "text/plain")
+    public String processSecondaryFolderSQL(@PathVariable(value="appId") long appId,@PathVariable(value="folderName") String folderName,@PathVariable(value="filePath") String filePath) {
+        return processSecondaryFolder(appId, folderName, filePath, "sql");
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{folderName}/{filePath}.js",produces = "text/javascript")
+    public String processSecondaryFolderJS(@PathVariable(value="appId") long appId,@PathVariable(value="folderName") String folderName,@PathVariable(value="filePath") String filePath) {
+        return processSecondaryFolder(appId, folderName, filePath, "js");
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{folderName}/{filePath}.css",produces = "text/css")
+    public String processSecondaryFolderCSS(@PathVariable(value="appId") long appId,@PathVariable(value="folderName") String folderName,@PathVariable(value="filePath") String filePath) {
+        return processSecondaryFolder(appId, folderName, filePath, "css");
+    }
+    
+    
+    @RequestMapping(value = "/{appId}/file/{filePath}.sql",produces = "text/plain")
+    public String processFileSQL(@PathVariable(value="appId") long appId,@PathVariable(value="filePath") String filePath) {
+        return processFile(appId, filePath, "sql");
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{filePath}.js",produces = "text/javascript")
+    public String processFileJS(@PathVariable(value="appId") long appId,@PathVariable(value="filePath") String filePath) {
+        return processFile(appId, filePath, "js");
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{filePath}.css",produces = "text/css")
+    public String processFileCSS(@PathVariable(value="appId") long appId,@PathVariable(value="filePath") String filePath) {
+        return processFile(appId, filePath, "css");
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{filePath}.php")
+    public String processFilePHP(@PathVariable(value="appId") long appId,@PathVariable(value="filePath") String filePath) {
+        return processFile(appId, filePath, "php");
+    }
+    
+    @RequestMapping(value = "/{appId}/file/{folderName}/{filePath}.{fileSuffix}")
+    public String processSecondaryFolder(@PathVariable(value="appId") long appId,@PathVariable(value="folderName") String folderName,@PathVariable(value="filePath") String filePath,@PathVariable(value="fileSuffix") String fileSuffix) {
+        return processFile(appId, folderName +"/"+filePath, fileSuffix);
+    }
+    @RequestMapping(value = "/{appId}/file/{filePath}.{fileSuffix}")
+    public String processFile(@PathVariable(value="appId") long appId,@PathVariable(value="filePath") String filePath,@PathVariable(value="fileSuffix") String fileSuffix) {
+        if (filePath==null || filePath.equals("")) return "";
+        if (fileSuffix!=null && !fileSuffix.equals("")) {
+            filePath += "."+ fileSuffix;
+        }
+        if (FILE_NAME_CONFIG_DOT_PHP.equals(filePath)) {
+            return configDotPHP(appId);
+        } else if (FILE_NAME_DATA_DOT_SQL.equals(filePath)) {
+            return dataDotSQL(appId);
+        } else {
+            List<String> commonFiles = new ArrayList();
+            String file = this.getClass().getResource(TEMPLATE_PATH+"/"+FOLDER_NAME_COMMON).getFile();
+            File commonFolder = new File(file);
+            listFilesForFolder(commonFolder,"",commonFiles);
+            if (commonFiles.contains(filePath)) {
+                return fileToString(TEMPLATE_PATH+"/"+FOLDER_NAME_COMMON+"/"+filePath);
+            } else if (filePath.endsWith(PHP_FILE_SUFFIX)) {
+                String itemName = filePath.substring(0, filePath.length()-PHP_FILE_SUFFIX.length());
+                if (filePath.startsWith(FOLDER_PREFIX_LIST)) {
+                    itemName = itemName.substring(FOLDER_PREFIX_LIST.length(), itemName.length());
+                    return listSlashItemDotPHP(appId, itemName);
+                } else if (filePath.startsWith(FOLDER_PREFIX_SINGLE)) {
+                    itemName = itemName.substring(FOLDER_PREFIX_SINGLE.length(), itemName.length());
+                    return singleSlashItemDotPHP(appId, itemName);
+                }
+            }
+        }
+        return "";
     }
     
     @RequestMapping(value = "/{appId}/zip", produces="application/zip")
@@ -85,28 +170,21 @@ public class PHPCodeGenerator {
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
         ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
         
-        putContentToPath(zipOutputStream, "sa-functions.php", saDashFunctionsDotPHP());
-        putContentToPath(zipOutputStream, "sa-login-form.php", saDashLoginDashFormDotPHP());
-        putContentToPath(zipOutputStream, "sa-login.php", saDashLoginDotPHP());
-        putContentToPath(zipOutputStream, "sa-logout.php", saDashLogoutDotPHP());
-        putContentToPath(zipOutputStream, "change-password.php", changeDashPasswordDotPHP(appId));
-        putContentToPath(zipOutputStream, "config.php", configDotPHP(appId));
-        putContentToPath(zipOutputStream, "data.sql", dataDotSQL(appId));
-        putContentToPath(zipOutputStream, "index.php", indexDotPHP(appId));
-        putContentToPath(zipOutputStream, "settings.php", settingsDotPHP(appId));
-        putContentToPath(zipOutputStream, "user-rights.php", userDashRightsDotPHP(appId));
-        putContentToPath(zipOutputStream, "user.php", userDotPHP(appId));
-        putContentToPath(zipOutputStream, "/css/style.css", cssSlashStyleDotCSS(appId));
-        putContentToPath(zipOutputStream, "/css/jquery-ui.css", cssSlashJqueryDashUiDotCSS(appId));
-        putContentToPath(zipOutputStream, "/js/jquery.js", jsSlashJqueryDotJS(appId));
-        putContentToPath(zipOutputStream, "/js/jquery-ui.js", jsSlashJqueryDashUiDotJS(appId));
-        
+        putContentToPath(zipOutputStream, FILE_NAME_CONFIG_DOT_PHP, configDotPHP(appId));
+        putContentToPath(zipOutputStream, FILE_NAME_DATA_DOT_SQL, dataDotSQL(appId));
+        List<String> commonFiles = new ArrayList();
+        String commonFolderFile = this.getClass().getResource(TEMPLATE_PATH+"/"+FOLDER_NAME_COMMON).getFile();
+        File commonFolder = new File(commonFolderFile);
+        listFilesForFolder(commonFolder,"",commonFiles);
+        for (String filePath: commonFiles) {
+            putContentToPath(zipOutputStream, "/"+filePath,fileToString(TEMPLATE_PATH+"/"+FOLDER_NAME_COMMON+"/"+filePath));
+        }
         Map root = appService.getAppForCodeGeneration(appId);
         List<Map> itemSetList = (List<Map>)((Map)root.get("app")).get("items");
         for (Map itemMap: itemSetList) {
             String name = (String)itemMap.get("name");
-            putContentToPath(zipOutputStream, "/list/"+name+".php", listSlashItemDotPHP(appId, name));
-            putContentToPath(zipOutputStream, "/single/"+name+".php", singleSlashItemDotPHP(appId, name));
+            putContentToPath(zipOutputStream, "/"+FOLDER_PREFIX_LIST+name+".php", listSlashItemDotPHP(appId, name));
+            putContentToPath(zipOutputStream, "/"+FOLDER_PREFIX_SINGLE+name+".php", singleSlashItemDotPHP(appId, name));
         }
         
         zipOutputStream.finish();
@@ -126,117 +204,52 @@ public class PHPCodeGenerator {
         zipOutputStream.closeEntry();
     }
     
-    @RequestMapping(value = "/{appId}/css/jquery-ui.css", produces="text/css")
-    public String cssSlashJqueryDashUiDotCSS(@PathVariable(value="appId") long appId) {
-        return templateToString("css.slash.jquery.dash.ui.css.ftl");
-    }
-    
-    @RequestMapping(value = "/{appId}/js/jquery.js", produces="text/js")
-    public String jsSlashJqueryDotJS(@PathVariable(value="appId") long appId) {
-        return templateToString("js.slash.jquery.js.ftl");
-    }
-    
-    @RequestMapping(value = "/{appId}/js/jquery-ui.js", produces="text/js")
-    public String jsSlashJqueryDashUiDotJS(@PathVariable(value="appId") long appId) {
-        return templateToString("js.slash.jquery.dash.ui.js.ftl");
-    }
-    
-    @RequestMapping(value = "/{appId}/change-password.php", produces="text/plain")
-    public String changeDashPasswordDotPHP(@PathVariable(value="appId") long appId) {
-        Map root = appService.getAppForCodeGeneration(appId);
-        return templateToString("change.dash.password.php.ftl",root);
-    }
-    
-    @RequestMapping(value = "/{appId}/config.php", produces="text/plain")
     public String configDotPHP(@PathVariable(value="appId") long appId) {
         Map root = appService.getAppForCodeGeneration(appId);
         return templateToString("config.php.ftl",root);
     }
     
-    @RequestMapping(value = "/{appId}/css/style.css", produces="text/css")
-    public String cssSlashStyleDotCSS(@PathVariable(value="appId") long appId) {
-        return templateToString("css.slash.style.css.ftl");
-    }
-    
-    @RequestMapping(value = "/{appId}/data.sql", produces="text/css")
     public String dataDotSQL(@PathVariable(value="appId") long appId) {
         Map root = appService.getAppForCodeGeneration(appId);
         return templateToString("data.sql.ftl",root);
     }
     
-    @RequestMapping(value = "/{appId}/index.php", produces="text/plain")
-    public String indexDotPHP(@PathVariable(value="appId") long appId) {
-        Map root = appService.getAppForCodeGeneration(appId);
-        return templateToString("index.php.ftl",root);
-    }
-            
-    @RequestMapping(value = "/{appId}/list/{itemName}.php", produces="text/plain")
     public String listSlashItemDotPHP(@PathVariable(value="appId") long appId,@PathVariable(value="itemName") String itemName) {
+        logger.info("item name: {}",itemName);
         Map root = appService.getAppForCodeGeneration(appId);
-        selectItem(root, itemName);
-        return templateToString("list.slash.item.php.ftl",root);
+        if (selectItem(root, itemName))
+            return templateToString("list.slash.item.php.ftl",root);
+        else
+            return "";
     }
     
-    @RequestMapping(value = "/{appId}/sa-functions.php", produces="text/plain")
-    public String saDashFunctionsDotPHP() {
-        return templateToString("sa.dash.functions.php.ftl");
-    }
-    
-    @RequestMapping(value = "/{appId}/sa-login-form.php", produces="text/plain")
-    public String saDashLoginDashFormDotPHP() {
-        return templateToString("sa.dash.login.dash.form.php.ftl");
-    }
-    
-    @RequestMapping(value = "/{appId}/sa-login.php", produces="text/plain")
-    public String saDashLoginDotPHP() {
-        return templateToString("sa.dash.login.php.ftl");
-    }
-    
-    @RequestMapping(value = "/{appId}/sa-logout.php", produces="text/plain")
-    public String saDashLogoutDotPHP() {
-        return templateToString("sa.dash.logout.php.ftl");
-    }
-
-    @RequestMapping(value = "/{appId}/settings.php", produces="text/plain")
-    public String settingsDotPHP(@PathVariable(value="appId") long appId) {
-        Map root = appService.getAppForCodeGeneration(appId);
-        return templateToString("settings.php.ftl",root);
-    }
-    
-    @RequestMapping(value = "/{appId}/single/{itemName}.php", produces="text/plain")
     public String singleSlashItemDotPHP(@PathVariable(value="appId") long appId,@PathVariable(value="itemName") String itemName) {
         Map root = appService.getAppForCodeGeneration(appId);
-        selectItem(root, itemName);
-        return templateToString("single.slash.item.php.ftl",root);
+        if (selectItem(root, itemName))
+            return templateToString("single.slash.item.php.ftl",root);
+        else
+            return "";
     }
     
-    @RequestMapping(value = "/{appId}/user-rights.php", produces="text/plain")
-    public String userDashRightsDotPHP(@PathVariable(value="appId") long appId) {
-        Map root = appService.getAppForCodeGeneration(appId);
-        return templateToString("user.dash.rights.php.ftl",root);
-    }
-    
-    @RequestMapping(value = "/{appId}/user.php", produces="text/plain")
-    public String userDotPHP(@PathVariable(value="appId") long appId) {
-        Map root = appService.getAppForCodeGeneration(appId);
-        return templateToString("user.php.ftl",root);
-    }
-    
-    private void selectItem(Map root, String itemName) {
+    private boolean selectItem(Map root, String itemName) {
         List<Map> itemSetList = (List<Map>)((Map)root.get("app")).get("items");
+        logger.info("selecting item: {}",itemName);
         for (Map itemMap: itemSetList) {
             String name = (String)itemMap.get("name");
+            logger.info("current item: {}",name);
             if (name.equals(itemName)) {
                 root.put("item", itemMap);
-                break;
+                return true;
             }
         }
+        logger.warn("no item found: {}",itemName);
+        return false;
     }
     
     private String templateToString(String template, Map model) {
         try {
             Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-            cfg.setDirectoryForTemplateLoading(new File("src/code-templates/php"));
+            cfg.setClassForTemplateLoading(this.getClass(), TEMPLATE_PATH);
             cfg.setDefaultEncoding("UTF-8");
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             Template temp = cfg.getTemplate(template);
@@ -246,12 +259,31 @@ public class PHPCodeGenerator {
             temp.process(model, out);
             return baos.toString();
         } catch (IOException | TemplateException ex) {
-            Logger.getLogger(PHPCodeGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+            logger.error(ex.toString(), ex);
         }
         return "";
     }
-
-    private String templateToString(String template) {
-        return templateToString(template,new HashMap());
+    
+    public void listFilesForFolder(final File folder,String directoryName,List<String> fileNameList) {
+        for (final File fileEntry : folder.listFiles()) {
+            String fileEntryName = fileEntry.getName();
+            if (!fileEntryName.endsWith("~")) {
+                if (fileEntry.isDirectory()) {
+                    listFilesForFolder(fileEntry,directoryName+fileEntryName+"/",fileNameList);
+                } else {
+                    fileNameList.add(directoryName+fileEntry.getName());
+                }
+            }
+    }
+}
+    private String fileToString(String file) {
+        try {
+            String path = this.getClass().getResource(file).getFile();
+            return FileUtils.readFileToString(new File(path));
+        } catch (IOException ex) {
+            logger.error(ex.toString(), ex);
+        }
+        return "";
     }
 }

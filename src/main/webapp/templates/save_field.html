@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
 All rights reserved.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -94,16 +94,20 @@ THE SOFTWARE.
                         <option></option>
                     </select>
                   </label>
-                  <label class="item item-input">
+                  <label  class="item item-input">
+                      <span class="input-label">&nbsp;</span>
+                    Note: Fields with the type, item or period cannot be selected for template.
+                  </label>
+                  <label class="item item-input" ng-show="(saveFieldDialog.data.formatData['refer'] && saveFieldDialog.data.formatData['refer'].trim()!='')">
                     <span class="input-label">Field</span>
                     <select ng-model="saveFieldDialog.data.formatData['field']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
-                        <option></option>
+                        <option>(select)</option>
                     </select>
-                    <select ng-model="saveFieldDialog.data.formatData['field2']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
-                        <option></option>
+                    <select ng-model="saveFieldDialog.data.formatData['field2']"  ng-show="(saveFieldDialog.data.formatData['field'] && saveFieldDialog.data.formatData['field'].trim()!='')" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
+                        <option>(select)</option>
                     </select>
-                    <select ng-model="saveFieldDialog.data.formatData['field3']" ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
-                        <option></option>
+                    <select ng-model="saveFieldDialog.data.formatData['field3']"  ng-show="(saveFieldDialog.data.formatData['field2'] && saveFieldDialog.data.formatData['field2'].trim()!='')"  ng-options="reference_item_field.id as (reference_item_field.label) for reference_item_field in saveFieldDialog.data.reference_item_fields" ng-change="saveFieldDialog.fnFieldReferenceSelected()">
+                        <option>(select)</option>
                     </select>
                   </label>
                   <label class="item item-input">

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 AppsoFluna.
+ * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -10,11 +10,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.appsofluna.simpleapps.controller;
 
 import com.appsofluna.simpleapps.model.Item;
 import com.appsofluna.simpleapps.service.ItemService;
-import com.appsofluna.simpleapps.service.UserService;
 import com.appsofluna.simpleapps.util.StringModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;

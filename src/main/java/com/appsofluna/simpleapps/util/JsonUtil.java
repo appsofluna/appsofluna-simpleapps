@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 AppsoFluna.
+ * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -10,6 +10,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.appsofluna.simpleapps.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;

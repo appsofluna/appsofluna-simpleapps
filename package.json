@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/appsofluna/appsofluna-simpleapps#readme",
   "devDependencies": {
+    "bower": "^1.3.3",
     "jasmine-core": "^2.3.4",
     "karma": "^0.13.15",
     "karma-chrome-launcher": "^0.2.1",

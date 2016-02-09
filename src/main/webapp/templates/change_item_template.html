@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
 All rights reserved.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -25,6 +25,10 @@ THE SOFTWARE.
           <span class="input-label">Template</span>
           {{changeItemTemplateDialog.data.template}}
         </label>
+        <label  class="item item-input">
+                <span class="input-label">&nbsp;</span>
+              Note: Fields with the type, item or period cannot be selected for template.
+            </label>
         <label class="item item-input">
           <span class="input-label">Add a new field</span>
           <select ng-model="changeItemTemplateDialog.data.newField" ng-options="ref_field as (ref_field.label) for ref_field in changeItemTemplateDialog.data.fields" ng-change="changeItemTemplateDialog.fnNewFieldOnChange()" >

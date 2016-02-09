@@ -12,7 +12,6 @@
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/repository/ValueRepository.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/service/RoleService.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/repository/FieldRepository.java
-/home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/controller/TestController.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/util/JsonUtil.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/repository/AppRepository.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/Field.java
@@ -20,9 +19,9 @@
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/repository/RoleRepository.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/service/PermissionService.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/App.java
-/home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/Role.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/Item.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/AbstractEntity.java
+/home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/Role.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/controller/UserController.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/repository/ItemRepository.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/service/ItemService.java
@@ -37,7 +36,6 @@
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/AppUser.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/service/ValueService.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/repository/AppUserRepository.java
-/home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/MainConfig.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/repository/PermissionRepository.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/service/UserService.java
 /home/charaka/Desktop/AppsOfLuna/SimpleApps/git/appsofluna-simpleapps/src/main/java/com/appsofluna/simpleapps/model/Record.java

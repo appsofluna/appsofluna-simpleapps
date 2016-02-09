@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+ * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -13,7 +13,7 @@
 
 // SimpleApps
 // 'appsoluna.simpleapps.controllers' is found in controllers.js
-angular.module('appsoluna.simpleapps', ['ionic', 'hljs','ionic-fancy-select','isteven-multi-select','appsoluna.simpleapps.controllers'])
+angular.module('appsoluna.simpleapps', ['ionic', 'hljs','ionic-fancy-select','mightyDatepicker','appsoluna.simpleapps.controllers'])
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard

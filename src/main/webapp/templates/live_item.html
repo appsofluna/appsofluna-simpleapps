@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
 All rights reserved.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -20,7 +20,12 @@ THE SOFTWARE.
         <a class="icon ion-home" href="#/app/live/{{current_userinfo.active_app_id}}"></a>
         &nbsp;
         <i class="icon ion-plus-round" ng-click="saveRecordDialog.fnShowAdd()" ng-show="(current_userinfo.assigned && current_userinfo.permission.createAllowed) || (!current_userinfo.assigned && current_userinfo.default)"></i>
-        
+        <div class="col-md-2">
+            <!--Sidebar content-->
+
+            Search: <input ng-model="query">
+
+          </div>
       </div>
     </div>
     <div class="list card">
@@ -30,7 +35,7 @@ THE SOFTWARE.
             <div class="col" ng-repeat="sa_field in sa_item_fields"><strong>{{sa_field.label}}</strong></div>
             <div class="col"><strong>#</strong></div>
           </ion-item>
-          <ion-item class="row" ng-repeat="sa_record in sa_item_records">
+          <ion-item class="row" ng-repeat="sa_record in sa_item_records | filter:query">
             <div class="col" ng-repeat="sa_field in sa_item_fields">
                 <span ng-switch="sa_field.type">
                     

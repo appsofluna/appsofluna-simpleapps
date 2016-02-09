@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+ * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -78,7 +78,7 @@ function hateoasFac($http, name) {
     return fac;
 }
 
-angular.module('appsoluna.simpleapps.services', ['ngResource', 'ngStorage','spring-data-rest'])
+angular.module('appsoluna.simpleapps.services', [ 'ngStorage'])
         .factory('SAApps', ['$http', function ($http) {
                 return hateoasFac($http, 'app');
             }])

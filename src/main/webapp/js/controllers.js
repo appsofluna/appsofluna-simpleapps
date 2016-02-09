@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+ * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -11,7 +11,7 @@
  * THE SOFTWARE.
  */
 
-angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsoluna.simpleapps.services'])
+angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.services'])
         .controller('AppCtrl', function ($scope,$state,$rootScope, $ionicModal, $ionicPopup, $timeout, SAApps, SAUsers,SALogin) {
             
             function setupLoginDialog() {
@@ -532,9 +532,16 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                         dialog.data.formatData['refer'] = Number(dialog.data.formatData['refer']);
                         dialog.data.reference_item_fields_by_id = {};
                         SAFields.findByItem(dialog.data.formatData['refer'], function (recs) {
-                            $scope.saveFieldDialog.data.reference_item_fields = recs;
-                            for (var refItemFieldNo in recs) {
-                                var refItemField = recs[refItemFieldNo];
+                            var all_ref_item_fields = [];
+                            for (var i in recs) {
+                                var sa_item_field = recs[i];
+                                if (sa_item_field.type!='item' && sa_item_field.type!='period') {
+                                    all_ref_item_fields.push(sa_item_field);
+                                }
+                            }
+                            $scope.saveFieldDialog.data.reference_item_fields = all_ref_item_fields;
+                            for (var refItemFieldNo in all_ref_item_fields) {
+                                var refItemField = all_ref_item_fields[refItemFieldNo];
                                 $scope.saveFieldDialog.data.reference_item_fields_by_id[refItemField.id] = refItemField;
                             }
                         });
@@ -561,16 +568,16 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     if (dialog.data.formatData['field']) {
                         var f_id = Number(dialog.data.formatData['field']);
                         template = template.concat('{',dialog.data.reference_item_fields_by_id[f_id].name,'}');
-                    };
-                    if (dialog.data.formatData['field2']) {
-                        var f_id = Number(dialog.data.formatData['field2']);
-                        if(template.length>0) template = template.concat(' ');
-                        template = template.concat('{',dialog.data.reference_item_fields_by_id[f_id].name,'}');
-                    };
-                    if (dialog.data.formatData['field3']) {
-                        var f_id = Number(dialog.data.formatData['field3']);
-                        if(template.length>0) template = template.concat(' ');
-                        template = template.concat('{',dialog.data.reference_item_fields_by_id[f_id].name,'}');
+                        if (dialog.data.formatData['field2']) {
+                            var f_id = Number(dialog.data.formatData['field2']);
+                            if(template.length>0) template = template.concat(' ');
+                            template = template.concat('{',dialog.data.reference_item_fields_by_id[f_id].name,'}');
+                            if (dialog.data.formatData['field3']) {
+                                var f_id = Number(dialog.data.formatData['field3']);
+                                if(template.length>0) template = template.concat(' ');
+                                template = template.concat('{',dialog.data.reference_item_fields_by_id[f_id].name,'}');
+                            };
+                        };
                     };
                     dialog.data.formatData['template'] = template;
                 };
@@ -699,7 +706,7 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     this.data.fields = [];
                     for (var i in $scope.sa_item_fields) {
                         var sa_item_field = $scope.sa_item_fields[i];
-                        if (sa_item_field.type!='item') {
+                        if (sa_item_field.type!='item' && sa_item_field.type!='period') {
                             this.data.fields.push(sa_item_field);
                         }
                     }
@@ -758,11 +765,23 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                     dialog.data.recordData = {
                         fieldValues: {}
                     };
+                    dialog.data.selectionArrays = {};
+                    dialog.data.mulitAllowed = {};
                     for(var saItemFieldNo in $scope.sa_item_fields) {
                         var saItemField = $scope.sa_item_fields[saItemFieldNo];
                         dialog.data.recordData.fieldValues[saItemField.id] = {
                             content: ""
                         };
+                        if(saItemField.type=='period') {
+                            var range = {};
+                            range.isRange = true;
+                            range.dateDbA =  moment();
+                            range.dateDbB =  moment();
+                            dialog.data.periodValues[saItemField.id] = range;
+                        } else if(saItemField.type=='selection') {
+                            var fieldData = $scope.fieldFormats[saItemField.id];
+                            dialog.data.mulitAllowed[saItemField.id] = ((fieldData['multiple']) ? true : false);
+                        }
                     }
                     loadFieldItems();
                     dialog.modal.show();
@@ -891,7 +910,6 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
                 };
             }
             setupSaveRecordDialog();
-            
 
             function loadFieldItems() {
                 console.log('loadFieldItems function');
@@ -1307,6 +1325,6 @@ angular.module('appsoluna.simpleapps.controllers', ['mightyDatepicker','appsolun
             $scope.fileClicked = function(file_name) {
                 $scope.selectedFile = file_name;
                 $scope.showFileContent = true;
-                $scope.subSource = "api/generate/"+$scope.lang+"/"+$stateParams.appId+"/"+file_name;
+                $scope.subSource = "api/generate/"+$scope.lang+"/"+$stateParams.appId+"/file/"+file_name;
             };
         });
