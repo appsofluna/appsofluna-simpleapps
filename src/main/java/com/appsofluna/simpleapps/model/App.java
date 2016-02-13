@@ -32,7 +32,7 @@ import javax.persistence.Table;
 public class App extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    @Column(name = "name", unique = true)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
     
     @Column(name = "description")

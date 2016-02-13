@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Charaka Gunatillake / AppsoFluna. (http://www.appsofluna.com)
+ * Copyright (c) 2016 AppsoFluna.
  * All rights reserved.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -10,36 +10,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.appsofluna.simpleapps.util;
 
 import java.util.Objects;
+import org.springframework.security.core.GrantedAuthority;
 
 /**
- * This string model class is used as a wrapper
- * for strings when sending http requests with text data
+ *
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
-public class StringModel {
-    private String string;
-
-    public String getString() {
-        return string;
-    }
-
-    public void setString(String string) {
-        this.string = string;
+public class BasicGrantedAuthority implements GrantedAuthority {
+    private final String gaString;
+    
+    public BasicGrantedAuthority(String gaString) {
+        this.gaString = gaString;
     }
     
     @Override
-    public String toString() {
-        return string;
+    public String getAuthority() {
+        return gaString;
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 13 * hash + Objects.hashCode(this.string);
+        int hash = 5;
+        hash = 29 * hash + Objects.hashCode(this.gaString);
         return hash;
     }
 
@@ -51,11 +46,12 @@ public class StringModel {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final StringModel other = (StringModel) obj;
-        if (!Objects.equals(this.string, other.string)) {
+        final BasicGrantedAuthority other = (BasicGrantedAuthority) obj;
+        if (!Objects.equals(this.gaString, other.gaString)) {
             return false;
         }
         return true;
     }
+    
     
 }

@@ -18,7 +18,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- *
+ * The repository interface for App Entity
+ * Spring handles the implementation
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @RepositoryRestResource(collectionResourceRel = "app", path = "app")

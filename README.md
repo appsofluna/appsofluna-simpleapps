@@ -1,4 +1,4 @@
-# AppsoFluna - SimpleApps v0.7
+# AppsoFluna - SimpleApps v0.9
 
 SimpleApps (by AppsoFluna) is a web-based tool to create simple applications.
 

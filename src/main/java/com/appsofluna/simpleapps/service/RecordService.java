@@ -21,7 +21,7 @@ import com.appsofluna.simpleapps.repository.FieldRepository;
 import com.appsofluna.simpleapps.repository.ItemRepository;
 import com.appsofluna.simpleapps.repository.RecordRepository;
 import com.appsofluna.simpleapps.repository.ValueRepository;
-import com.appsofluna.simpleapps.util.JsonUtil;
+import com.appsofluna.simpleapps.util.CommonUtils;
 import com.appsofluna.simpleapps.util.SAConstraints;
 import com.appsofluna.simpleapps.util.ValidationUtils;
 import java.util.List;
@@ -132,7 +132,7 @@ public class RecordService {
                 if (forward && SAConstraints.FIELD_TYPE_ITEM.equals(type)) {
                     try {
                         long refRecordId = Long.parseLong(fieldContent);
-                        Map<String, Object> formatMap = JsonUtil.stringToMap(field.getFormat());
+                        Map<String, Object> formatMap = CommonUtils.stringToMap(field.getFormat());
                         Object refItemIdObj = formatMap.get(SAConstraints.FIELD_TYPE_ITEM_PARM_REFER);
                         Long refItemId = null;
                         if (refItemIdObj instanceof Long) {

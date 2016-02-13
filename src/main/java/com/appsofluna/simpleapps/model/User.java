@@ -33,7 +33,7 @@ public class User extends AbstractEntity implements Serializable {
     public static final String USER_TYPE_BASIC = "BASIC";
     private static final long serialVersionUID = 1L;
     
-    @Column(name = "username", unique = true)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
     
     @Column(name = "password")

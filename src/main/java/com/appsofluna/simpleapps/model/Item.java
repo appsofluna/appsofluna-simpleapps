@@ -23,20 +23,23 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  *
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="simpleapps_item")
+@Table(name="simpleapps_item",uniqueConstraints = {
+  @UniqueConstraint(columnNames = {"app_id","name"})  
+})
 public class Item extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "app_id")
     private App app;
-    @Column(name = "name", unique = true)
+    @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "label")
     private String label;

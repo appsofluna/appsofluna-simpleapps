@@ -15,6 +15,7 @@ package com.appsofluna.simpleapps.service;
 
 import com.appsofluna.simpleapps.model.Field;
 import com.appsofluna.simpleapps.repository.FieldRepository;
+import com.appsofluna.simpleapps.util.SAConstraints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
@@ -24,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
+ * The service-layer class that performs value related functions
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Service
@@ -45,7 +46,7 @@ public class ValueService {
         //3.get value field for each record
         
         Field field = fieldRepository.findOne(fieldId);
-        if ("item".equalsIgnoreCase(field.getType())) {
+        if (SAConstraints.FIELD_TYPE_ITEM.equalsIgnoreCase(field.getType())) {
             //field refers to an item
             String fieldFormat = field.getFormat();
             

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- *
+ * The service-layer class that performs role related functions
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Service
@@ -32,24 +32,18 @@ public class RoleService {
     @Autowired
     private PermissionRepository permissionRepo;
     
+    /**
+     * Enables or disables all items for a given role.
+     * If it's enabled, all the special permissions will be deleted.
+     * @param roleId the id of the role
+     * @param enabled whether enabled or not
+     */
     @Transactional
     public void allowAllItems(long roleId, boolean enabled) {
         Role role = roleRepo.findOne(roleId);
         role.setAllItemsAllowed(enabled);
         roleRepo.save(role);
-        permissionRepo.deleteAllPermissionsFor(role.getId());
-    }
-    
-    @Transactional
-    public Permission savePermission(Permission permission) {
-        Permission existingPermission = permissionRepo.findByRoleAndItem(permission.getRole().getId(), permission.getItem().getId());
-        if (existingPermission!=null) {
-            existingPermission.setAccessAllowed(permission.isAccessAllowed());
-            existingPermission.setCreateAllowed(permission.isCreateAllowed());
-            existingPermission.setEditAllowed(permission.isEditAllowed());
-            existingPermission.setDeleteAllowed(permission.isDeleteAllowed());
-            permission = existingPermission;
-        }
-        return permissionRepo.save(permission);
+        if (enabled)
+            permissionRepo.deleteAllPermissionsFor(role.getId());
     }
 }

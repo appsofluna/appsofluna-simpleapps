@@ -19,22 +19,25 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  *
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="simpleapps_field")
+@Table(name="simpleapps_field",uniqueConstraints = {
+  @UniqueConstraint(columnNames = {"item_id","name"})  
+})
 public class Field extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "item_id")
     private Item item;
     @Column(name = "type")
     private String type;
-    @Column(name = "name", unique = true)
+    @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "label")
     private String label;

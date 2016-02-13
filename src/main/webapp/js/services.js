@@ -59,9 +59,17 @@ function hateoasFac($http, name) {
             }
         };
         if (!rec._links) {
-            $http.post(HATEOAS_URL, rec).then(fnCallback, fnCallback);
+            $http.post(HATEOAS_URL, rec).then(fnCallback,  function(res) {
+                        if (callback && callback.fnError) {
+                            callback.fnError(res);
+                        }
+                    });
         } else {
-            $http.patch(rec._links.self.href, rec).then(fnCallback, fnCallback);
+            $http.patch(rec._links.self.href, rec).then(fnCallback, function(res) {
+                        if (callback && callback.fnError) {
+                            callback.fnError(res);
+                        }
+                    });
         }
     };
     fac.delete = function (rec, callback) {
@@ -78,7 +86,7 @@ function hateoasFac($http, name) {
     return fac;
 }
 
-angular.module('appsoluna.simpleapps.services', [ 'ngStorage'])
+angular.module('appsofluna.simpleapps.services', [ 'ngStorage'])
         .factory('SAApps', ['$http', function ($http) {
                 return hateoasFac($http, 'app');
             }])
@@ -254,7 +262,11 @@ angular.module('appsoluna.simpleapps.services', [ 'ngStorage'])
                             }
                         }
                     };
-                    $http.post(fac.facUrl + '/save', rec).then(fnCallback, fnCallback);
+                    $http.post(fac.facUrl + '/save', rec).then(fnCallback, function(res) {
+                        if (callback && callback.fnError) {
+                            callback.fnError(res);
+                        }
+                    });
                 };
                 
                 fac.changePassword = function(user_id, password, callback) {

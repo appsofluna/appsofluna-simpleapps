@@ -22,11 +22,11 @@ import com.appsofluna.simpleapps.repository.AppUserRepository;
 import com.appsofluna.simpleapps.repository.RoleRepository;
 import com.appsofluna.simpleapps.repository.UserRepository;
 import com.appsofluna.simpleapps.util.SAConstraints;
+import com.appsofluna.simpleapps.util.SecurityUtils;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +58,7 @@ public class UserService {
     public User createUser(String username, String password, boolean admin) {
         User user = new User();
         user.setUsername(username);
-        user.setPassword(encodePassword(password));
+        user.setPassword(SecurityUtils.encodePassword(password));
         user.setType(admin ? User.USER_TYPE_ADMIN : User.USER_TYPE_BASIC);
         return userRepository.save(user);
     }
@@ -93,16 +93,10 @@ public class UserService {
         }
         
         //changing password
-        user.setPassword(encodePassword(password));
+        user.setPassword(SecurityUtils.encodePassword(password));
         
         logger.info("password changed");
         return userRepository.save(user);
-    }
-    
-    //encodes the password into an encrypted hash
-    private String encodePassword(String password) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(password);
     }
 
     /**

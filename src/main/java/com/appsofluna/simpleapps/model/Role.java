@@ -23,21 +23,24 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  *
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Entity
-@Table(name="simpleapps_role")
+@Table(name="simpleapps_role",uniqueConstraints = {
+  @UniqueConstraint(columnNames = {"app_id","name"})  
+})
 public class Role extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "app_id")
     private App app;
     
-    @Column(name = "name",unique = true)
+    @Column(name = "name",nullable = false)
     private String name;
     
     @Column(name = "is_all_items_allowed")

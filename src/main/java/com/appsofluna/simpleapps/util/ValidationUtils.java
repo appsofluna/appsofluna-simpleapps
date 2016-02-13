@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Validation methods
+ * The utility class for validation functions
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 public class ValidationUtils {

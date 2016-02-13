@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *
+ * The controller-layer class that routes permission related requests
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @RestController

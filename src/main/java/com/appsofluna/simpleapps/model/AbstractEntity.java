@@ -22,7 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 /**
- *
+ * This abstract entity class contains the common fields for entity classes
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @MappedSuperclass

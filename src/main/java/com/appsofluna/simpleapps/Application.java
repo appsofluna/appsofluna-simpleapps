@@ -17,7 +17,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- *
+ * Spring boot application runner class
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @SpringBootApplication

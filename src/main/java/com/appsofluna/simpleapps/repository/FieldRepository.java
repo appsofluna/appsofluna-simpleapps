@@ -14,7 +14,6 @@
 package com.appsofluna.simpleapps.repository;
 
 import com.appsofluna.simpleapps.model.Field;
-import com.appsofluna.simpleapps.model.Item;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -22,7 +21,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- *
+ * The repository interface for Field Entity
+ * Spring handles the implementation
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @RepositoryRestResource(collectionResourceRel = "field", path = "field")

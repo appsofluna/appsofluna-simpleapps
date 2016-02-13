@@ -14,15 +14,13 @@
 package com.appsofluna.simpleapps.service;
 
 import com.appsofluna.simpleapps.model.Permission;
-import com.appsofluna.simpleapps.model.Role;
 import com.appsofluna.simpleapps.repository.PermissionRepository;
-import com.appsofluna.simpleapps.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- *
+ * The service-layer class that performs permission related functions
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Service
@@ -30,6 +28,13 @@ public class PermissionService {
     @Autowired
     private PermissionRepository permissionRepo;
     
+    /**
+     * Creates/Updates permission records.
+     * If a permission with the same role and item is available, it will be updated.
+     * Otherwise a new permission will be created.
+     * @param permission the permission record
+     * @return the saved record
+     */
     @Transactional
     public Permission savePermission(Permission permission) {
         Permission existingPermission = permissionRepo.findByRoleAndItem(permission.getRole().getId(), permission.getItem().getId());

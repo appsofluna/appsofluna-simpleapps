@@ -14,7 +14,7 @@
 package com.appsofluna.simpleapps.util;
 
 /**
- *
+ * Constraints specific to SimpleApps
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 public class SAConstraints {

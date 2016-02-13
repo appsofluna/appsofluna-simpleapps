@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The controller class for user related functions
+ * The controller-layer class that routes user related requests
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @RestController

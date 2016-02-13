@@ -31,13 +31,13 @@ import javax.persistence.UniqueConstraint;
 public class AppUser extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name="app_id")
     private App app;
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name="user_id")
     private User user;
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name="role_id")
     private Role role;
 

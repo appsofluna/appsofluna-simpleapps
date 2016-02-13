@@ -11,7 +11,7 @@
  * THE SOFTWARE.
  */
 
-angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.services'])
+angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.services'])
         .controller('AppCtrl', function ($scope,$state,$rootScope, $ionicModal, $ionicPopup, $timeout, SAApps, SAUsers,SALogin) {
             
             function setupLoginDialog() {
@@ -41,6 +41,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     SALogin.login(this.data.username,this.data.password,function(res_auth) {
                         $rootScope.authenticated = res_auth;
                         $rootScope.username =  $scope.loginDialog.data.username;
+                        $scope.loginDialog.data.loggedIn = true;
                         load();
                         $scope.loginDialog.fnClose();
                     });
@@ -85,10 +86,22 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 
                 // Perform the save action when the user submits the app form
                 dialog.fnSubmit = function () {
+                    $ionicPopup.alert({
+                        title: 'Unable to save!',
+                        template: 'Check whether the app name is already in use'
+                      });
                     this.fnClose();
-                    SAApps.save(this.data, function (result) {
+                    var callback = {};
+                    callback.func = function (result) {
                         load();
-                    });
+                    };
+                    callback.fnError = function (data) {
+                        $ionicPopup.alert({
+                            title: 'Unable to save!',
+                            template: 'Check whether the app name is already in use'
+                          });
+                    };
+                    SAApps.save(this.data, callback);
                 };
             }
             
@@ -134,7 +147,7 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
             
             load();
         })
-        .controller('SettingsCtrl', function ($scope, $ionicModal, SAUsers) {
+        .controller('SettingsCtrl', function ($scope, $ionicModal, $ionicPopup,SAUsers) {
             function setupSaveUserDialog() {
                 $scope.saveUserDialog = {};
                 
@@ -160,10 +173,26 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                 
                 // Perform the save action when the user submits the user form
                 dialog.fnSubmit = function () {
-                    this.fnClose();
-                    SAUsers.save(this.data, function (res) {
+                    if ((!dialog.data.username || dialog.data.username.trim()=='') || (!dialog.data.password || dialog.data.password.trim()=='')) {
+                        $ionicPopup.alert({
+                            title: 'Unable to save!',
+                            template: 'Please enter a username and a password'
+                          });
+                          return false;
+                    };
+                    var callback = {};
+                    callback.func = function () {
+                        $scope.saveUserDialog.fnClose();
                         load();
-                    });
+                    };
+                    callback.fnError = function (data) {
+                        $ionicPopup.alert({
+                            title: 'Unable to save!',
+                            template: 'Check whether the user name is already in use'
+                          });
+                        return false;
+                    };
+                    SAUsers.save(this.data, callback);
                 };
             }
             
@@ -643,9 +672,17 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
 
                     field.format = JSON.stringify(this.data.formatData);
                     console.log(field.format);
-                    SAFields.save(field, function () {
+                    var callback = {};
+                    callback.func = function () {
                         loadRecords();
-                    });
+                    };
+                    callback.fnError = function (data) {
+                        $ionicPopup.alert({
+                            title: 'Unable to save!',
+                            template: 'Check whether the field name is already in use'
+                          });
+                    };
+                    SAFields.save(field, callback);
 
                     console.log('Added field', field);
                 };
@@ -1234,9 +1271,17 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     var item = $scope.itemData;
                     console.log('Saving item', item);
                     item.app = $scope.sa_app._links.self.href;
-                    SAItems.save(item, function (data) {
+                    var callback = {};
+                    callback.func =function (data) {
                         loadItems();
-                    });
+                    };
+                    callback.fnError = function (data) {
+                        $ionicPopup.alert({
+                            title: 'Unable to save!',
+                            template: 'Check whether the item name is already in use'
+                          });
+                    };
+                    SAItems.save(item, callback);
                     console.log('Saved item', item);
                 };
                 
@@ -1302,10 +1347,17 @@ angular.module('appsoluna.simpleapps.controllers', ['appsoluna.simpleapps.servic
                     var role = $scope.roleData;
                     console.log('Saving role', role);
                     role.app = $scope.sa_app._links.self.href;
-                    SARoles.save(role, function (data) {
+                    var callback = {};
+                    callback.func = function () {
                         loadRoles();
-                        $scope.$apply();
-                    });
+                    };
+                    callback.fnError = function (data) {
+                        $ionicPopup.alert({
+                            title: 'Unable to save!',
+                            template: 'Check whether the role name is already in use'
+                          });
+                    };
+                    SARoles.save(role, callback);
                 };
             }
         })

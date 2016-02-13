@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *
+ * The controller-layer class that routes item related requests
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @RestController

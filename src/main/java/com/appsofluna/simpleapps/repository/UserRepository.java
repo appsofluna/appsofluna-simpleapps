@@ -20,7 +20,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- *
+ * The repository interface for User Entity
+ * Spring handles the implementation
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @RepositoryRestResource(collectionResourceRel = "user", path = "user")

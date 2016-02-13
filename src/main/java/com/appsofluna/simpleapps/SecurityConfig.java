@@ -13,6 +13,7 @@
 
 package com.appsofluna.simpleapps;
 
+import com.appsofluna.simpleapps.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 /**
- *
+ * Security configuration class
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Configuration
@@ -34,11 +35,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
-    private SimpleUserDetailsService userDetailsService;
+    private LoginService loginService;
     
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(loginService).passwordEncoder(passwordEncoder());
     }
     
     @Bean

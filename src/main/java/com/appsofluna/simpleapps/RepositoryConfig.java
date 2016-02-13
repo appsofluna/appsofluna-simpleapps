@@ -18,7 +18,7 @@ import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
 
 /**
- *
+ * Repository configuration class
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @Configuration

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *
+ * The controller-layer class that routes record related requests
  * @author Charaka Gunatillake <charakajg[at]gmail[dot]com>
  */
 @RestController
