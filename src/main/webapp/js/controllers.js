@@ -38,12 +38,27 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                 
                 // Perform the login action when the user submits the login form
                 dialog.fnSubmit = function () {
+                    if ((!dialog.data.username || dialog.data.username.trim()=='') || (!dialog.data.password || dialog.data.password.trim()=='')) {
+                        $ionicPopup.alert({
+                            title: 'Unable to login!',
+                            template: 'Please enter a username and a password'
+                          });
+                          return false;
+                    };
                     SALogin.login(this.data.username,this.data.password,function(res_auth) {
-                        $rootScope.authenticated = res_auth;
-                        $rootScope.username =  $scope.loginDialog.data.username;
-                        $scope.loginDialog.data.loggedIn = true;
-                        load();
-                        $scope.loginDialog.fnClose();
+                        if (res_auth) {
+                            $rootScope.authenticated = res_auth;
+                            $rootScope.username =  $scope.loginDialog.data.username;
+                            $scope.loginDialog.data.loggedIn = true;
+                            load();
+                            $scope.loginDialog.fnClose();
+                        } else {
+                            $ionicPopup.alert({
+                                title: 'Unable to login!',
+                                template: 'Wrong password or username!'
+                              });
+                              return false;
+                        }
                     });
                 };
                 

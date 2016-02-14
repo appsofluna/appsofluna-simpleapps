@@ -34,6 +34,17 @@ public class SecurityUtils {
     }
     
     /**
+     * Returns whether password matches with the encodded password
+     * @param password password
+     * @param encodedPassword encoded hash
+     * @return result whether password matches
+     */
+    public static boolean matchPassword(String password, String encodedPassword) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.matches(password, encodedPassword);
+    }
+    
+    /**
      * Converts list of strings to a collection of granted authorities
      * @param gaStringArray the array of strings with authority names
      * @return the collection of granted authorities

@@ -35,6 +35,18 @@ public class SecurityUtilsTest {
         String result = SecurityUtils.encodePassword(password);
         assertTrue(new BCryptPasswordEncoder().matches(password, result));
     }
+    
+    /**
+     * Test of matchPassword method, of class SecurityUtils.
+     */
+    @Test
+    public void testMatchPassword() {
+        System.out.println("matchPassword");
+        String password = "test password";
+        String encodedHash = new BCryptPasswordEncoder().encode(password);
+        boolean result = SecurityUtils.matchPassword(password, encodedHash);
+        assertTrue(result);
+    }
 
     /**
      * Test of convertToGACollection method, of class SecurityUtils.

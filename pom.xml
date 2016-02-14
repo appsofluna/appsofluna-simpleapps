@@ -5,7 +5,7 @@
 
     <groupId>com.appsofluna</groupId>
     <artifactId>simpleapps</artifactId>
-    <version>0.9</version>
+    <version>1.0</version>
     <name>appsofluna-simpleapps</name>
     <organization>
         <name>AppsoFluna</name>
@@ -20,7 +20,7 @@
       </developer>
     </developers>
     <description>SimpleApps (by AppsoFluna): A web-based tool to create simple applications.</description>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

@@ -1,6 +1,6 @@
 {
   "name": "appsofluna-simpleapps",
-  "version": "0.9",
+  "version": "1.0",
   "appPath": "src/main/webapp",
   "private": "true",
   "install": {

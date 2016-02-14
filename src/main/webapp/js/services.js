@@ -342,34 +342,48 @@ angular.module('appsofluna.simpleapps.services', [ 'ngStorage'])
                 var fac = {};
 
                 fac.login = function (userName, password, callback) {
-                    var headers = {authorization: "Basic " + btoa(userName + ":" + password)};
-                    $http.get('api', {headers: headers}).success(function (data) {
-                        var authenticated = false;
-                        if (data._links) {
-                            authenticated = true;
+                    var stringModel = {};
+                    stringModel.string = password;
+                    $http.post('login-api/canLogin?username='+userName,stringModel).then(function(res) {
+                        if (res && res.data && res.data=='CanLogin') {
+                            var headers = {authorization: "Basic " + btoa(userName + ":" + password)};
+                            $http.get('api', {headers: headers}).success(function (data) {
+                                var authenticated = false;
+                                if (data._links) {
+                                    authenticated = true;
+                                } else {
+                                    authenticated = false;
+                                }
+                                $sessionStorage.authStat = JSON.stringify(
+                                {
+                                    authenticated: authenticated,
+                                    username: userName
+                                });
+                                if (callback) {
+                                    if (callback.func)
+                                        callback.func(authenticated);
+                                    else
+                                        callback(authenticated);
+                                }
+                            }).error(function () {
+                                var authenticated = false;
+                                $sessionStorage.authStat = JSON.stringify({authenticated: authenticated});
+                                if (callback) {
+                                    if (callback.func)
+                                        callback.func(authenticated);
+                                    else
+                                        callback(authenticated);
+                                }
+                            });
                         } else {
-                            authenticated = false;
+                            var authenticated = false;
+                            $sessionStorage.authStat = JSON.stringify({authenticated: authenticated});
+                            callback(false);
                         }
-                        $sessionStorage.authStat = JSON.stringify(
-                        {
-                            authenticated: authenticated,
-                            username: userName
-                        });
-                        if (callback) {
-                            if (callback.func)
-                                callback.func(authenticated);
-                            else
-                                callback(authenticated);
-                        }
-                    }).error(function () {
+                    }, function () {
                         var authenticated = false;
                         $sessionStorage.authStat = JSON.stringify({authenticated: authenticated});
-                        if (callback) {
-                            if (callback.func)
-                                callback.func(authenticated);
-                            else
-                                callback(authenticated);
-                        }
+                        callback(false);
                     });
                 };
 

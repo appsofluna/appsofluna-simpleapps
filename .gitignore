@@ -1,2 +1,4 @@
 /target/
 /bower_components/
+
+!/target/simpleapps-*.0.war
