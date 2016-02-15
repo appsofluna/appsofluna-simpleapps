@@ -46,18 +46,18 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                           return false;
                     };
                     SALogin.login(this.data.username,this.data.password,function(res_auth) {
+                        $scope.loginDialog.fnClose();
                         if (res_auth) {
                             $rootScope.authenticated = res_auth;
                             $rootScope.username =  $scope.loginDialog.data.username;
                             $scope.loginDialog.data.loggedIn = true;
                             load();
-                            $scope.loginDialog.fnClose();
                         } else {
                             $ionicPopup.alert({
                                 title: 'Unable to login!',
                                 template: 'Wrong password or username!'
-                              });
-                              return false;
+                            });
+                            return false;
                         }
                     });
                 };
