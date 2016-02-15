@@ -101,13 +101,9 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                 
                 // Perform the save action when the user submits the app form
                 dialog.fnSubmit = function () {
-                    $ionicPopup.alert({
-                        title: 'Unable to save!',
-                        template: 'Check whether the app name is already in use'
-                      });
-                    this.fnClose();
                     var callback = {};
                     callback.func = function (result) {
+                        $scope.saveAppDialog.fnClose();
                         load();
                     };
                     callback.fnError = function (data) {
@@ -115,6 +111,7 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                             title: 'Unable to save!',
                             template: 'Check whether the app name is already in use'
                           });
+                          return false;
                     };
                     SAApps.save(this.data, callback);
                 };
@@ -681,7 +678,6 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                 // Perform the save action when the user submits the field form
                 dialog.fnSubmit = function () {
                     console.log('saveFieldDialog.fnSubmit function');
-                    this.fnClose();
                     var field = this.data.fieldData;
                     field.item = $scope.sa_item._links.self.href;
 
@@ -689,6 +685,7 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                     console.log(field.format);
                     var callback = {};
                     callback.func = function () {
+                        $scope.saveFieldDialog.fnClose();
                         loadRecords();
                     };
                     callback.fnError = function (data) {
@@ -696,6 +693,7 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                             title: 'Unable to save!',
                             template: 'Check whether the field name is already in use'
                           });
+                          return false;
                     };
                     SAFields.save(field, callback);
 
@@ -1282,12 +1280,12 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
 
                 // Perform the save action when the user submits the item form
                 $scope.saveItem = function () {
-                    $scope.closeSaveItem();
                     var item = $scope.itemData;
                     console.log('Saving item', item);
                     item.app = $scope.sa_app._links.self.href;
                     var callback = {};
                     callback.func =function (data) {
+                        $scope.closeSaveItem();
                         loadItems();
                     };
                     callback.fnError = function (data) {
@@ -1295,6 +1293,7 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                             title: 'Unable to save!',
                             template: 'Check whether the item name is already in use'
                           });
+                          return false;
                     };
                     SAItems.save(item, callback);
                     console.log('Saved item', item);
@@ -1358,12 +1357,12 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
 
                 // Perform the save action when the user submits the role form
                 $scope.saveRole = function () {
-                    $scope.closeSaveRole();
                     var role = $scope.roleData;
                     console.log('Saving role', role);
                     role.app = $scope.sa_app._links.self.href;
                     var callback = {};
                     callback.func = function () {
+                        $scope.closeSaveRole();
                         loadRoles();
                     };
                     callback.fnError = function (data) {
@@ -1371,6 +1370,7 @@ angular.module('appsofluna.simpleapps.controllers', ['appsofluna.simpleapps.serv
                             title: 'Unable to save!',
                             template: 'Check whether the role name is already in use'
                           });
+                          return false;
                     };
                     SARoles.save(role, callback);
                 };
