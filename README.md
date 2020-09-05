@@ -33,6 +33,8 @@ GitHub Repository - https://github.com/appsofluna/appsofluna-simpleapps
 
 Project Website - http://www.appsofluna.com
 
-Working Prototype - http://simpleapps-appsofluna.rhcloud.com
+~~Working Prototype - http://simpleapps-appsofluna.rhcloud.com
 Note that as it's on a free openshift account, it takes serveral minutes to start work, once it has been idle.
-Therefore you might receive an error first. In that case you can visit the prototype after few minutes.
+Therefore you might receive an error first. In that case you can visit the prototype after few minutes.~~
+
+Working Prototype - http://www.appsofluna.com:8080
