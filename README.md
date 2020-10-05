@@ -6,6 +6,10 @@ This project will be submitted as the PGD Level Project for BCS Higher Education
 
 The progress of this project will be submitted on http://www.appsofluna.com/
 
+**Demo**
+
+[![SimpleApps Demo](http://img.youtube.com/vi/e5qW0Sv_RtQ/0.jpg)](http://www.youtube.com/watch?v=e5qW0Sv_RtQ)
+
 ## Prerequesties
 
 1. MySQL
