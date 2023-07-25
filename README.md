@@ -4,8 +4,6 @@ SimpleApps (by AppsoFluna) is a web-based tool to create simple applications.
 
 This project will be submitted as the PGD Level Project for BCS Higher Education Qualification.
 
-The progress of this project will be submitted on http://www.appsofluna.com/
-
 **Demo**
 
 [![SimpleApps Demo](http://img.youtube.com/vi/e5qW0Sv_RtQ/0.jpg)](http://www.youtube.com/watch?v=e5qW0Sv_RtQ)
@@ -32,13 +30,3 @@ password = **guess**
 
 If you made no changes the result will be similar to that of **sample_school.zip** file.
 
-# Futher information
-GitHub Repository - https://github.com/appsofluna/appsofluna-simpleapps
-
-Project Website - http://www.appsofluna.com
-
-~~Working Prototype - http://simpleapps-appsofluna.rhcloud.com
-Note that as it's on a free openshift account, it takes serveral minutes to start work, once it has been idle.
-Therefore you might receive an error first. In that case you can visit the prototype after few minutes.~~
-
-Working Prototype - http://www.appsofluna.com:8080
